@@ -2,7 +2,7 @@
 using ReverseAnalytics.Domain.Common;
 using ReverseAnalytics.Domain.Exceptions;
 using ReverseAnalytics.Domain.Interfaces.Repositories;
-using ReverseAnalytics.Domain.ResourceParameters;
+using ReverseAnalytics.Domain.QueryParameters;
 using ReverseAnalytics.Infrastructure.Extensions;
 using ReverseAnalytics.Infrastructure.Persistence;
 

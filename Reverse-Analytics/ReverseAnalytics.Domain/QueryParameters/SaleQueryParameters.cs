@@ -1,5 +1,4 @@
 ﻿using ReverseAnalytics.Domain.Enums;
-using ReverseAnalytics.Domain.ResourceParameters;
 
 namespace ReverseAnalytics.Domain.QueryParameters;
 

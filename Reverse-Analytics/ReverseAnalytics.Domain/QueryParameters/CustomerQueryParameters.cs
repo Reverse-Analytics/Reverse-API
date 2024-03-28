@@ -1,6 +1,4 @@
-﻿using ReverseAnalytics.Domain.ResourceParameters;
-
-namespace ReverseAnalytics.Domain.QueryParameters;
+﻿namespace ReverseAnalytics.Domain.QueryParameters;
 
 public class CustomerQueryParameters : PaginatedQueryParameters
 {

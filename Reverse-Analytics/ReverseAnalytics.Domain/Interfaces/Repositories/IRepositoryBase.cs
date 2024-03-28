@@ -1,5 +1,5 @@
 ﻿using ReverseAnalytics.Domain.Common;
-using ReverseAnalytics.Domain.ResourceParameters;
+using ReverseAnalytics.Domain.QueryParameters;
 
 namespace ReverseAnalytics.Domain.Interfaces.Repositories;
 
