@@ -32,8 +32,6 @@ public class CommonRepository(ApplicationDbContext context) : ICommonRepository
     private ITransactionRepository _transaction = new TransactionRepository(context);
     public ITransactionRepository Transaction => _transaction ??= new TransactionRepository(context);
 
-    public Task<int> SaveChangesAsync()
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<int> SaveChangesAsync()
+        => await context.SaveChangesAsync();
 }

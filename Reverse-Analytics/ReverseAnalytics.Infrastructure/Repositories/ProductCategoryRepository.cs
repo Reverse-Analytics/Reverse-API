@@ -12,6 +12,8 @@ public class ProductCategoryRepository(ApplicationDbContext context) : Repositor
 {
     public async Task<PaginatedList<ProductCategory>> FindAllAsync(ProductCategoryQueryParameters queryParameters)
     {
+        ArgumentNullException.ThrowIfNull(queryParameters);
+
         var query = _context.ProductCategories.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(queryParameters.SearchQuery))
