@@ -8,55 +8,50 @@ using ReverseAnalytics.Infrastructure.Persistence;
 
 namespace ReverseAnalytics.Infrastructure.Repositories;
 
-public abstract class RepositoryBase<T>(ApplicationDbContext context) : IRepositoryBase<T> where T : BaseAuditableEntity
+public abstract class RepositoryBase<TEntity>(ApplicationDbContext context) : IRepositoryBase<TEntity> where TEntity : BaseAuditableEntity
 {
     protected readonly ApplicationDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-    public async Task<IEnumerable<T>> FindAllAsync()
+    public async Task<IEnumerable<TEntity>> FindAllAsync()
     {
-        var entities = await _context.Set<T>()
+        var entities = await _context.Set<TEntity>()
             .AsNoTracking()
             .ToListAsync();
 
         return entities;
     }
 
-    public virtual async Task<PaginatedList<T>> FindAllAsync(PaginatedQueryParameters queryParameters)
+    public virtual async Task<PaginatedList<TEntity>> FindAllAsync(PaginatedQueryParameters queryParameters)
     {
         ArgumentNullException.ThrowIfNull(queryParameters);
 
-        var entities = await _context.Set<T>()
+        var entities = await _context.Set<TEntity>()
             .AsNoTracking()
             .ToPaginatedListAsync(queryParameters.PageNumber, queryParameters.PageSize);
 
         return entities;
     }
 
-    public async Task<T> FindByIdAsync(int id)
+    public async Task<TEntity?> FindByIdAsync(int id)
     {
-        var entity = await _context.Set<T>()
+        var entity = await _context.Set<TEntity>()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (entity is null)
-        {
-            throw new EntityNotFoundException($"Entity {typeof(T)} with id: {id} does not exist.");
-        }
 
         return entity;
     }
 
-    public async Task<T> CreateAsync(T entity)
+    public async Task<TEntity> CreateAsync(TEntity entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
 
-        var createdEntity = await _context.Set<T>().AddAsync(entity);
+        var createdEntity = await _context.Set<TEntity>().AddAsync(entity);
         await _context.SaveChangesAsync();
 
         return createdEntity.Entity;
     }
 
-    public async Task<IEnumerable<T>> CreateRangeAsync(IEnumerable<T> entities)
+    public async Task<IEnumerable<TEntity>> CreateRangeAsync(IEnumerable<TEntity> entities)
     {
         ArgumentNullException.ThrowIfNull(entities);
 
@@ -67,7 +62,7 @@ public abstract class RepositoryBase<T>(ApplicationDbContext context) : IReposit
 
         foreach (var entity in entities)
         {
-            var attachedEntity = _context.Set<T>().Attach(entity);
+            var attachedEntity = _context.Set<TEntity>().Attach(entity);
             attachedEntity.State = Microsoft.EntityFrameworkCore.EntityState.Added;
         }
 
@@ -76,17 +71,22 @@ public abstract class RepositoryBase<T>(ApplicationDbContext context) : IReposit
         return entities;
     }
 
-    public async Task<T> UpdateAsync(T entity)
+    public async Task<TEntity> UpdateAsync(TEntity entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
 
-        var updatedEntity = _context.Set<T>().Update(entity);
+        if (!await EntityExistsAsync(entity.Id))
+        {
+            throw new EntityNotFoundException($"{nameof(TEntity)} with id: {entity.Id} does not exist.");
+        }
+
+        var updatedEntity = _context.Set<TEntity>().Update(entity);
         await _context.SaveChangesAsync();
 
         return updatedEntity.Entity;
     }
 
-    public async Task UpdateRangeAsync(IEnumerable<T> entities)
+    public async Task UpdateRangeAsync(IEnumerable<TEntity> entities)
     {
         ArgumentNullException.ThrowIfNull(entities);
 
@@ -95,7 +95,7 @@ public abstract class RepositoryBase<T>(ApplicationDbContext context) : IReposit
             return;
         }
 
-        _context.Set<T>().UpdateRange(entities);
+        _context.Set<TEntity>().UpdateRange(entities);
         await _context.SaveChangesAsync();
     }
 
@@ -105,10 +105,10 @@ public abstract class RepositoryBase<T>(ApplicationDbContext context) : IReposit
 
         if (entityToDelete is null)
         {
-            throw new EntityNotFoundException($"Entity {typeof(T)} with id: {id} does not exist.");
+            throw new EntityNotFoundException($"Entity {typeof(TEntity)} with id: {id} does not exist.");
         }
 
-        _context.Set<T>().Remove(entityToDelete);
+        _context.Set<TEntity>().Remove(entityToDelete);
         await _context.SaveChangesAsync();
     }
 
@@ -128,7 +128,7 @@ public abstract class RepositoryBase<T>(ApplicationDbContext context) : IReposit
     }
 
     public async Task<bool> EntityExistsAsync(int id)
-        => await _context.Set<T>().AnyAsync(x => x.Id == id);
+        => await _context.Set<TEntity>().AnyAsync(x => x.Id == id);
 
     public Task<int> SaveChangesAsync() => _context.SaveChangesAsync();
 }

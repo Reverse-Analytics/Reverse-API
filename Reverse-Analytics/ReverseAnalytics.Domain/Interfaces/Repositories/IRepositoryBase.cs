@@ -9,7 +9,7 @@ public interface IRepositoryBase<TEntity> where TEntity : BaseEntity
 
     Task<PaginatedList<TEntity>> FindAllAsync(PaginatedQueryParameters queryParameters);
 
-    Task<TEntity> FindByIdAsync(int id);
+    Task<TEntity?> FindByIdAsync(int id);
 
     Task<TEntity> CreateAsync(TEntity entity);
 

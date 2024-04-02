@@ -36,7 +36,7 @@ public sealed class ProductCategoryService(ICommonRepository repository, IMapper
         return _mapper.Map<IEnumerable<ProductCategoryDto>>(entities);
     }
 
-    public async Task<ProductCategoryDto> GetByIdAsync(int id)
+    public async Task<ProductCategoryDto?> GetByIdAsync(int id)
     {
         var entity = await _repository.ProductCategory.FindByIdAsync(id);
 
