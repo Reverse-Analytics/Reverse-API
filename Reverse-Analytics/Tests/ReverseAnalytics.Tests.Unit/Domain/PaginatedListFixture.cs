@@ -170,7 +170,7 @@ public class PaginatedListFixture
         var paginatedList = new PaginatedList<int>(items, 1, 10, 20);
 
         // Act
-        var metaData = paginatedList.ToMetaData();
+        var metaData = paginatedList.MetaData;
 
         // Assert
         metaData.TotalCount.Should().Be(20);

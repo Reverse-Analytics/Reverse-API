@@ -79,7 +79,7 @@ public class ProductCategoryServiceFixture : ServiceFixtureBase
         var categories = new List<ProductCategory>();
         _mockRepository.Setup(r => r.ProductCategory.FindAllAsync()).ReturnsAsync(categories);
 
-        _mockMapper.Setup(m => m.Map<IEnumerable<ProductCategoryDto>>(categories)).Throws(new Exception("Mapping failed"));
+        _mockMapper.Setup(m => m.Map<IEnumerable<ProductCategoryDto>>(categories)).Throws(new Exception("Mapping failed."));
 
         // Act & Assert
         await Assert.ThrowsAsync<Exception>(() => _productCategoryService.GetAllAsync());
@@ -99,7 +99,7 @@ public class ProductCategoryServiceFixture : ServiceFixtureBase
         // Arrange
         var request = _fixture.Create<ProductCategoryQueryParameters>();
         var paginatedCategories = _fixture.Create<PaginatedList<ProductCategory>>();
-        var metadata = paginatedCategories.ToMetaData();
+        var metadata = paginatedCategories.MetaData;
         var categoryDtos = _fixture.CreateMany<ProductCategoryDto>(5);
 
         _mockRepository.Setup(x => x.ProductCategory.FindAllAsync(request)).ReturnsAsync(paginatedCategories);

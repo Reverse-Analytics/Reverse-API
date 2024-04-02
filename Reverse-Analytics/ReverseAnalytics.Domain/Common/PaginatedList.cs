@@ -75,14 +75,11 @@ public class PaginatedList<T> : List<T>
     /// Converts the pagination information to <see cref="PaginationMetaData"/>.
     /// </summary>
     /// <returns>The pagination metadata.</returns>
-    public PaginationMetaData ToMetaData()
-    {
-        return new PaginationMetaData(
-            TotalCount,
+    public PaginationMetaData MetaData
+        => new(TotalCount,
             PageSize,
             CurrentPage,
             PagesCount,
             HasNext,
             HasPrevious);
-    }
 }

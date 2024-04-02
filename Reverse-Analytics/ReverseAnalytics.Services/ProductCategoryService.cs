@@ -26,7 +26,7 @@ public sealed class ProductCategoryService(ICommonRepository repository, IMapper
 
         var paginatedResult = await _repository.ProductCategory.FindAllAsync(queryParameters);
 
-        return (_mapper.Map<IEnumerable<ProductCategoryDto>>(paginatedResult), paginatedResult.ToMetaData());
+        return (_mapper.Map<IEnumerable<ProductCategoryDto>>(paginatedResult), paginatedResult.MetaData);
     }
 
     public async Task<IEnumerable<ProductCategoryDto>> GetAllByParentIdAsync(int parentId)
