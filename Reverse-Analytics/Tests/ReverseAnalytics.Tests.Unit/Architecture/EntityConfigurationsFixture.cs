@@ -1,18 +1,18 @@
 ﻿using FluentAssertions;
 
-namespace ReverseAnalytics.Tests.Unit.Domain;
+namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class EntityConfigurationsFixture : DomainBaseFixture
 {
     [Fact]
-    public void Entities_ShouldHave_Configuration()
+    public void Entities_ShouldHave_Configurations()
     {
         // Arrange
-        var expectedEntities = GetEntities();
-        var actualConfigurations = GetConfigurations();
+        var entities = GetEntities();
+        var configurations = GetConfigurations();
 
-        // Assert
-        expectedEntities.Count.Should().Be(actualConfigurations.Count);
+        // Assert & Assert
+        entities.Count.Should().Be(configurations.Count);
     }
 
     [Fact]
@@ -25,7 +25,7 @@ public class EntityConfigurationsFixture : DomainBaseFixture
         // Act & Assert
         foreach (var entity in entities)
         {
-            configurations.Should().Contain(configuration => configuration.StartsWith(entity.Name));
+            configurations.Should().Contain(configuration => configuration.Name.StartsWith(entity.Name));
         }
     }
 
@@ -38,7 +38,7 @@ public class EntityConfigurationsFixture : DomainBaseFixture
         // Act & Assert
         foreach (var configuration in configurations)
         {
-            configuration.Should().EndWith("Configuration");
+            configuration.Name.Should().EndWith("Configuration");
         }
     }
 }
