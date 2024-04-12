@@ -1,14 +1,15 @@
 ﻿using FluentAssertions;
 using NetArchTest.Rules;
 using ReverseAnalytics.Domain.Common;
+using ReverseAnalytics.Tests.Unit.Constants;
 using System.Reflection;
 
 namespace ReverseAnalytics.Tests.Unit.Architecture;
 
-public class EntitiesFixture : DomainBaseFixture
+public class EntitiesFixture : ArchitectureTestsBase
 {
     [Fact]
-    public void Entities_ShouldResideInEntitiesNamespace()
+    public void Entities_ShouldReside_InEntitiesNamespace()
     {
         // Arrange
 
@@ -21,7 +22,7 @@ public class EntitiesFixture : DomainBaseFixture
             .And()
             .AreNotInterfaces()
             .Should()
-            .ResideInNamespace("ReverseAnalytics.Domain.Entities")
+            .ResideInNamespace(Namespaces.ENTITIES)
             .GetResult()
             .IsSuccessful;
 
@@ -30,12 +31,12 @@ public class EntitiesFixture : DomainBaseFixture
     }
 
     [Fact]
-    public void EntitiesNamespace_ShouldContainOnlyEntities()
+    public void EntitiesNamespace_ShouldContain_OnlyEntities()
     {
         // Arrange
 
         // Act
-        var result = Types.InNamespace("ReverseAnalytics.Domain.Entities")
+        var result = Types.InNamespace(Namespaces.ENTITIES)
             .Should()
             .Inherit(typeof(BaseEntity))
             .GetResult()

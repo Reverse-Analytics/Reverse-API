@@ -1,10 +1,54 @@
 ﻿using FluentAssertions;
+using NetArchTest.Rules;
 using ReverseAnalytics.Domain.QueryParameters;
+using ReverseAnalytics.Tests.Unit.Constants;
 
 namespace ReverseAnalytics.Tests.Unit.Architecture;
 
-public class QueryParametersFixture : DomainBaseFixture
+public class QueryParametersFixture : ArchitectureTestsBase
 {
+    [Fact]
+    public void QueryParameters_ShouldReside_InQueryParametersNamespace()
+    {
+        // Arrange
+
+        // Act
+        var result = Types.InAssembly(DomainAssembly)
+            .That()
+            .Inherit(typeof(QueryParametersBase))
+            .And()
+            .AreNotAbstract()
+            .And()
+            .AreNotInterfaces()
+            .Should()
+            .ResideInNamespace(Namespaces.QUERY_PARAMETERS)
+            .GetResult()
+            .IsSuccessful;
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void QueryParametersNamespace_ShouldContain_OnlyQueryParameters()
+    {
+        // Arrange
+
+        // Act
+        var result = Types.InNamespace(Namespaces.QUERY_PARAMETERS)
+            .That()
+            .AreNotAbstract()
+            .And()
+            .AreNotInterfaces()
+            .Should()
+            .Inherit(typeof(QueryParametersBase))
+            .GetResult()
+            .IsSuccessful;
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
     [Fact]
     public void QueryParameters_ShouldEnd_WithQueryParameters()
     {
@@ -14,39 +58,7 @@ public class QueryParametersFixture : DomainBaseFixture
         // Act & Assert
         foreach (var type in queryParameters)
         {
-            type.Name.Should().EndWith("QueryParameters");
-        }
-    }
-
-    [Fact]
-    public void QueryParameters_ShouldBe_InQueryParametersNamespace()
-    {
-        // Arrange
-        var types = typeof(QueryParametersBase).Assembly
-            .GetTypes()
-            .Where(x => !x.IsAbstract && !x.IsInterface && typeof(QueryParametersBase).IsAssignableFrom(x))
-            .ToList();
-
-        // Act & Assert
-        foreach (var type in types)
-        {
-            type.Namespace.Should().Contain("QueryParameters", $"{type.Name} located in {type.Namespace} instead of QueryParameters namespace.");
-        }
-    }
-
-    [Fact]
-    public void QueryParametersNamespace_ShouldContain_OnlyQueryParameters()
-    {
-        // Arrange
-        var types = typeof(QueryParametersBase).Assembly
-            .GetTypes()
-            .Where(x => x.Namespace != null && x.Namespace.Contains("Domain.QueryParameters"))
-            .ToList();
-
-        // Act & Assert
-        foreach (var type in types)
-        {
-            type.Should().BeAssignableTo(typeof(QueryParametersBase));
+            type.Name.Should().EndWith("QueryParameters", $"{type.Name} should end with 'QueryParameters'.");
         }
     }
 }

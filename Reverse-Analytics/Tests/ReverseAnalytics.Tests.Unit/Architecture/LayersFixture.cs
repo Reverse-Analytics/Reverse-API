@@ -2,7 +2,7 @@
 using NetArchTest.Rules;
 
 namespace ReverseAnalytics.Tests.Unit.Architecture;
-public class LayersFixture : DomainBaseFixture
+public class LayersFixture : ArchitectureTestsBase
 {
     [Fact]
     public void DomainLayer_ShouldNotHave_AnyDependencies()
@@ -11,8 +11,8 @@ public class LayersFixture : DomainBaseFixture
 
         // Act
         var result = Types.InAssembly(DomainAssembly)
-            .ShouldNot()
-            .HaveDependencyOnAll("Infrastructure", "Services", "Api")
+            .Should()
+            .NotHaveDependencyOnAll("Infrastructure", "Services", "Api")
             .GetResult()
             .IsSuccessful;
 

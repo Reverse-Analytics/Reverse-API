@@ -8,13 +8,13 @@ using System.Reflection;
 
 namespace ReverseAnalytics.Tests.Unit.Architecture;
 
-public class DomainBaseFixture
+public class ArchitectureTestsBase
 {
     protected readonly Assembly DomainAssembly = typeof(BaseEntity).Assembly;
     protected readonly Assembly InfrastructureAssembly = typeof(ApplicationDbContext).Assembly;
     protected readonly Assembly ServicesAssembly = typeof(ProductCategoryService).Assembly;
 
-    protected DomainBaseFixture()
+    protected ArchitectureTestsBase()
     {
     }
 
