@@ -1,6 +1,4 @@
-﻿using AutoFixture;
-
-namespace ReverseAnalytics.Tests.Unit;
+﻿namespace ReverseAnalytics.Tests.Unit;
 
 public abstract class FixtureBase
 {

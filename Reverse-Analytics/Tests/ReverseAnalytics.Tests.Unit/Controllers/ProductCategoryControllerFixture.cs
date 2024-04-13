@@ -1,17 +1,4 @@
-﻿using Moq;
-using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
-using Reverse_Analytics.Api.Controllers;
-using ReverseAnalytics.Domain.Common;
-using ReverseAnalytics.Domain.DTOs.ProductCategory;
-using ReverseAnalytics.Domain.Interfaces.Services;
-using ReverseAnalytics.Domain.QueryParameters;
-using AutoFixture;
-using FluentAssertions;
-using System.Net;
-using Newtonsoft.Json;
-
-namespace ReverseAnalytics.Tests.Unit.Controllers;
+﻿namespace ReverseAnalytics.Tests.Unit.Controllers;
 
 public class ProductCategoryControllerTests : ControllerFixtureBase
 {
@@ -33,7 +20,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     }
 
     [Fact]
-    public async Task GetCategoriesAsync_ShouldReturnOkResult_WhenCalled()
+    public async Task GetCategoriesAsync_ShouldReturnOkResult_WhenExecutedSuccessfully()
     {
         // Arrange
         var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
@@ -51,7 +38,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     }
 
     [Fact]
-    public async Task GetCategories_ShouldReturnOkStatusCode_WhenExecutedSuccessfully()
+    public async Task GetCategories_ShouldReturn200StatusCode_WhenExecutedSuccessfully()
     {
         // Arrange
         var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
@@ -125,7 +112,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldReturnOkResult_WhenCalled()
+    public async Task GetByIdAsync_ShouldReturnOkResult_WhenExecutedSuccessfully()
     {
         // Arrange
         var categoryId = _fixture.Create<int>();
@@ -144,7 +131,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldReturnOkStatusCode_WhenExecutedSuccessfully()
+    public async Task GetByIdAsync_ShouldReturn200StatusCode_WhenExecutedSuccessfully()
     {
         // Arrange
         var categoryId = _fixture.Create<int>();

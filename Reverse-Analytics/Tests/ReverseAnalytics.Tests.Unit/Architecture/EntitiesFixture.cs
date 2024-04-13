@@ -1,10 +1,4 @@
-﻿using FluentAssertions;
-using NetArchTest.Rules;
-using ReverseAnalytics.Domain.Common;
-using ReverseAnalytics.Tests.Unit.Constants;
-using System.Reflection;
-
-namespace ReverseAnalytics.Tests.Unit.Architecture;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class EntitiesFixture : ArchitectureTestsBase
 {

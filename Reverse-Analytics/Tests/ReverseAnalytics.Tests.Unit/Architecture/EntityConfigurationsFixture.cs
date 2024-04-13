@@ -1,9 +1,4 @@
-﻿using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using NetArchTest.Rules;
-using ReverseAnalytics.Tests.Unit.Constants;
-
-namespace ReverseAnalytics.Tests.Unit.Architecture;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class EntityConfigurationsFixture : ArchitectureTestsBase
 {

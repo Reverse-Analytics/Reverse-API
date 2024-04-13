@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-
-namespace ReverseAnalytics.Tests.Unit.Controllers;
+﻿namespace ReverseAnalytics.Tests.Unit.Controllers;
 
 public abstract class ControllerFixtureBase : FixtureBase
 {

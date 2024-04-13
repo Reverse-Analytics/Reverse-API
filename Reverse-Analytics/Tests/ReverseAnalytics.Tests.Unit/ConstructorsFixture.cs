@@ -1,10 +1,4 @@
-﻿using FluentAssertions;
-using Reverse_Analytics.Api.Controllers;
-using ReverseAnalytics.Infrastructure.Repositories;
-using ReverseAnalytics.Services;
-using System.Reflection;
-
-namespace ReverseAnalytics.Tests.Unit;
+﻿namespace ReverseAnalytics.Tests.Unit;
 
 public class ConstructorsFixture
 {

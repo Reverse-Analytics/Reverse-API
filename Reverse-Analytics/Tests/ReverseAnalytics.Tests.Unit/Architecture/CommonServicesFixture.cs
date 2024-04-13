@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-
-namespace ReverseAnalytics.Tests.Unit.Architecture;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class CommonServicesFixture : ArchitectureTestsBase
 {

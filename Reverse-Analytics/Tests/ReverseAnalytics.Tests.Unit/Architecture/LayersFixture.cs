@@ -1,7 +1,5 @@
-﻿using FluentAssertions;
-using NetArchTest.Rules;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
-namespace ReverseAnalytics.Tests.Unit.Architecture;
 public class LayersFixture : ArchitectureTestsBase
 {
     [Fact]

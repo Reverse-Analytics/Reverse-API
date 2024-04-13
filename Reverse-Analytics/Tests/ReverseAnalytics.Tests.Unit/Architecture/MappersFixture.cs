@@ -1,9 +1,4 @@
-﻿using AutoMapper;
-using FluentAssertions;
-using NetArchTest.Rules;
-using ReverseAnalytics.Tests.Unit.Constants;
-
-namespace ReverseAnalytics.Tests.Unit.Architecture;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class MappersFixture : ArchitectureTestsBase
 {

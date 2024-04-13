@@ -1,9 +1,4 @@
-﻿using FluentAssertions;
-using NetArchTest.Rules;
-using ReverseAnalytics.Domain.QueryParameters;
-using ReverseAnalytics.Tests.Unit.Constants;
-
-namespace ReverseAnalytics.Tests.Unit.Architecture;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class QueryParametersFixture : ArchitectureTestsBase
 {

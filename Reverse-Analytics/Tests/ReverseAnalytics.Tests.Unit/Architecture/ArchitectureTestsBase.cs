@@ -1,12 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using ReverseAnalytics.Domain.Common;
-using ReverseAnalytics.Domain.QueryParameters;
-using ReverseAnalytics.Infrastructure.Persistence;
-using ReverseAnalytics.Services;
-using System.Reflection;
-
-namespace ReverseAnalytics.Tests.Unit.Architecture;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class ArchitectureTestsBase
 {

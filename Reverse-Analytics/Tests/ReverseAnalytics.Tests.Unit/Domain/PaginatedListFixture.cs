@@ -1,8 +1,4 @@
-﻿using AutoFixture;
-using FluentAssertions;
-using ReverseAnalytics.Domain.Common;
-
-namespace ReverseAnalytics.Tests.Unit.Domain;
+﻿namespace ReverseAnalytics.Tests.Unit.Domain;
 
 public class PaginatedListFixture
 {

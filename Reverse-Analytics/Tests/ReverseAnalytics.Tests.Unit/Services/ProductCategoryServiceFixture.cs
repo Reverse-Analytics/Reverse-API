@@ -1,14 +1,4 @@
-﻿using AutoFixture;
-using FluentAssertions;
-using Moq;
-using ReverseAnalytics.Domain.Common;
-using ReverseAnalytics.Domain.DTOs.ProductCategory;
-using ReverseAnalytics.Domain.Entities;
-using ReverseAnalytics.Domain.Exceptions;
-using ReverseAnalytics.Domain.QueryParameters;
-using ReverseAnalytics.Services;
-
-namespace ReverseAnalytics.Tests.Unit.Services;
+﻿namespace ReverseAnalytics.Tests.Unit.Services;
 
 public class ProductCategoryServiceFixture : ServiceFixtureBase
 {
