@@ -13,6 +13,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
         _mockCategoryService = new Mock<IProductCategoryService>();
         _mockProductService = new Mock<IProductService>();
         _mockValidator = new Mock<IValidator<ProductCategoryForUpdateDto>>();
+
         _controller = new ProductCategoryController(_mockProductService.Object, _mockCategoryService.Object, _mockValidator.Object)
         {
             ControllerContext = _controllerContext
@@ -24,7 +25,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     {
         // Arrange
         var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = _fixture.Create<PaginatedList<ProductCategoryDto>>();
+        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
         var metadata = paginatedCategories.MetaData;
 
         _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
@@ -42,7 +43,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     {
         // Arrange
         var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = _fixture.Create<PaginatedList<ProductCategoryDto>>();
+        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
         var metadata = paginatedCategories.MetaData;
 
         _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
@@ -60,7 +61,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     {
         // Arrange
         var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = _fixture.Create<PaginatedList<ProductCategoryDto>>();
+        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
         var metadata = paginatedCategories.MetaData;
 
         _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
@@ -78,7 +79,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     {
         // Arrange
         var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = _fixture.Create<PaginatedList<ProductCategoryDto>>();
+        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
         var metadata = paginatedCategories.MetaData;
 
         _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
