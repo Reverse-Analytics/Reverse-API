@@ -74,7 +74,7 @@ public class ProductCategoryController(
     {
         if (id != categoryToUpdate.Id)
         {
-            return BadRequest($"Route id: {id} does not match with category id: {categoryToUpdate.Id}");
+            return BadRequest($"Route id: {id} does not match with category id: {categoryToUpdate.Id}.");
         }
 
         var updatedCategory = await _productCategoryService.UpdateAsync(categoryToUpdate);
@@ -111,7 +111,7 @@ public class ProductCategoryController(
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> DeleteAsync(int id)
     {
         await _productCategoryService.DeleteAsync(id);
 
