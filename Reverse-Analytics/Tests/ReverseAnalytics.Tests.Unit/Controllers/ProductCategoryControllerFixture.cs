@@ -21,60 +21,6 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
     }
 
     [Fact]
-    public async Task GetCategoriesAsync_ShouldReturnOkResult_WhenExecutedSuccessfully()
-    {
-        // Arrange
-        var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
-        var metadata = paginatedCategories.MetaData;
-
-        _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
-
-        // Act
-        var result = await _controller.GetCategoriesAsync(queryParameters);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Result.Should().BeOfType<OkObjectResult>();
-    }
-
-    [Fact]
-    public async Task GetCategories_ShouldReturn200StatusCode_WhenExecutedSuccessfully()
-    {
-        // Arrange
-        var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
-        var metadata = paginatedCategories.MetaData;
-
-        _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
-
-        // Act
-        var result = await _controller.GetCategoriesAsync(queryParameters);
-
-        // Assert
-        var okResult = result.Result as OkObjectResult;
-        okResult!.StatusCode.Should().Be(((int)HttpStatusCode.OK));
-    }
-
-    [Fact]
-    public async Task GetCategories_ShouldReturnCategoryDtosAsModelType_WhenCalled()
-    {
-        // Arrange
-        var queryParameters = _fixture.Create<ProductCategoryQueryParameters>();
-        var paginatedCategories = CreatePaginatedList<ProductCategoryDto>();
-        var metadata = paginatedCategories.MetaData;
-
-        _mockCategoryService.Setup(x => x.GetAllAsync(queryParameters)).ReturnsAsync((paginatedCategories, metadata));
-
-        // Act
-        var result = await _controller.GetCategoriesAsync(queryParameters);
-
-        // Assert
-        var okResult = result.Result as OkObjectResult;
-        okResult!.Value.Should().BeAssignableTo<IEnumerable<ProductCategoryDto>>();
-    }
-
-    [Fact]
     public async Task GetCategoriesAsync_ShouldReturnAllCategories_WhenCalled()
     {
         // Arrange
@@ -86,9 +32,12 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
 
         // Act
         var result = await _controller.GetCategoriesAsync(queryParameters);
+        var okResult = result.Result as OkObjectResult;
 
         // Assert
-        var okResult = result.Result as OkObjectResult;
+        okResult.Should().NotBeNull();
+        okResult!.StatusCode.Should().Be(((int)HttpStatusCode.OK));
+        okResult!.Value.Should().BeAssignableTo<IEnumerable<ProductCategoryDto>>();
         okResult!.Value.Should().BeEquivalentTo(paginatedCategories);
     }
 
@@ -104,16 +53,16 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
 
         // Act
         _ = await _controller.GetCategoriesAsync(queryParameters);
-
-        // Assert
-        _headerDictionary.Should().ContainKey("X-Pagination");
-
+        var actualHeaderValue = _response.Headers["X-Pagination"].FirstOrDefault();
         var expectedHeaderValue = JsonConvert.SerializeObject(metadata, Formatting.Indented);
-        _headerDictionary["X-Pagination"].Should().BeEquivalentTo(expectedHeaderValue);
+
+        // Assert
+        actualHeaderValue.Should().NotBeNull();
+        actualHeaderValue.Should().Be(expectedHeaderValue);
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldReturnOkResult_WhenExecutedSuccessfully()
+    public async Task GetByIdAsync_ShouldReturnCategoryDto_WhenCalled()
     {
         // Arrange
         var categoryId = _fixture.Create<int>();
@@ -125,47 +74,12 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
 
         // Act
         var result = await _controller.GetByIdAsync(categoryId);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Result.Should().BeOfType<OkObjectResult>();
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ShouldReturn200StatusCode_WhenExecutedSuccessfully()
-    {
-        // Arrange
-        var categoryId = _fixture.Create<int>();
-        var categoryDto = _fixture.Build<ProductCategoryDto>()
-                                  .With(x => x.Id, categoryId)
-                                  .Create();
-
-        _mockCategoryService.Setup(x => x.GetByIdAsync(categoryId)).ReturnsAsync(categoryDto);
-
-        // Act
-        var result = await _controller.GetByIdAsync(categoryId);
-
-        // Assert
         var okResult = result.Result as OkObjectResult;
-        okResult!.StatusCode.Should().Be((int)HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ShouldReturnCategory_WhenCalled()
-    {
-        // Arrange
-        var categoryId = _fixture.Create<int>();
-        var categoryDto = _fixture.Build<ProductCategoryDto>()
-                                  .With(x => x.Id, categoryId)
-                                  .Create();
-
-        _mockCategoryService.Setup(x => x.GetByIdAsync(categoryId)).ReturnsAsync(categoryDto);
-
-        // Act
-        var result = await _controller.GetByIdAsync(categoryId);
 
         // Assert
-        var okResult = result.Result as OkObjectResult;
+        okResult.Should().NotBeNull();
+        okResult!.StatusCode.Should().Be(((int)HttpStatusCode.OK));
+        okResult!.Value.Should().BeAssignableTo<ProductCategoryDto>();
         okResult!.Value.Should().Be(categoryDto);
     }
 
