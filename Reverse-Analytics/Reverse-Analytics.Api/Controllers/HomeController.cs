@@ -1,15 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ReverseAnalytics.Domain.Entities;
-using ReverseAnalytics.Infrastructure.Persistence;
 
 namespace Reverse_Analytics.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class HomeController(ApplicationDbContext context) : CommonControllerBase
+public class HomeController() : CommonControllerBase
 {
-    private readonly ApplicationDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
-
     // GET: api/<HomeController>
     [HttpGet]
     public IEnumerable<string> Get()
@@ -28,19 +24,6 @@ public class HomeController(ApplicationDbContext context) : CommonControllerBase
     [HttpPost]
     public void Post([FromBody] string value)
     {
-        var sale = new Sale()
-        {
-            TotalDue = 1000,
-            TotalPaid = 5000,
-            TotalDiscount = 2000,
-            Currency = ReverseAnalytics.Domain.Enums.CurrencyType.USD,
-            Date = DateTime.Now,
-            Comments = "No comments",
-            CustomerId = 1
-        };
-
-        _context.Sales.Add(sale);
-        _context.SaveChanges();
     }
 
     // PUT api/<HomeController>/5

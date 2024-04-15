@@ -21,7 +21,7 @@ public class ProductCategoryController(
     private readonly IProductCategoryService _productCategoryService = productCategoryService ?? throw new ArgumentNullException(nameof(productCategoryService));
     private readonly IValidator<ProductCategoryForUpdateDto> _validator = validator ?? throw new ArgumentNullException(nameof(validator));
 
-    [HttpGet(Name = nameof(GetCategoriesAsync))]
+    [HttpGet]
     [HttpHead]
     public async Task<ActionResult<IEnumerable<ProductCategoryDto>>> GetCategoriesAsync([FromQuery] ProductCategoryQueryParameters queryParameters)
     {

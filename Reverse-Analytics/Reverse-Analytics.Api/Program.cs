@@ -18,7 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 
-builder.Services.AddLogger()
+builder.Services
+    .AddLogger()
     .AddInfrastructure(builder.Configuration)
     .AddRepositories()
     .AddValidators()
@@ -64,3 +65,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

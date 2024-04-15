@@ -1,4 +1,4 @@
-﻿namespace ReverseAnalytics.Tests.Unit;
+﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
 public class ConstructorsFixture
 {
