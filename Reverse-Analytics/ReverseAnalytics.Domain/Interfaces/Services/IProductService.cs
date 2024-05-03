@@ -1,14 +1,15 @@
 ﻿using ReverseAnalytics.Domain.DTOs.Product;
+using ReverseAnalytics.Domain.QueryParameters;
 
-namespace ReverseAnalytics.Domain.Interfaces.Services
+namespace ReverseAnalytics.Domain.Interfaces.Services;
+
+public interface IProductService
 {
-    public interface IProductService
-    {
-        Task<IEnumerable<ProductDto>?> GetProductsAsync();
-        Task<IEnumerable<ProductDto>?> GetProductsAsync(string? searchString, int? categoryId, int pageSize, int pageNumber);
-        Task<ProductDto?> GetProductByIdAsync(int id);
-        Task<ProductDto> CreateProductAsync(ProductForCreateDto productToCreate);
-        Task UpdateProductAsync(ProductForUpdateDto productToUpdate);
-        Task DeleteProductAsync(int id);
-    }
+    Task<IEnumerable<ProductDto>> GetAllAsync();
+    Task<IEnumerable<ProductDto>> GetAllAsync(ProductQueryParameters queryParameters);
+    Task<IEnumerable<ProductDto>> GetByCategoryAsync(int categoryId);
+    Task<ProductDto> GetByIdAsync(int id);
+    Task<ProductDto> CreateAsync(ProductForCreateDto productToCreate);
+    Task<ProductDto> UpdateAsync(ProductForUpdateDto productToUpdate);
+    Task DeleteAsync(int id);
 }

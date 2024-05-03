@@ -9,9 +9,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.Domain", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.Infrastructure", "ReverseAnalytics.Infrastructure\ReverseAnalytics.Infrastructure.csproj", "{1F92F8F0-A90D-490E-8DDF-642C6F179E04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseAnalytics.Repositories", "ReverseAnalytics.Repositories\ReverseAnalytics.Repositories.csproj", "{8B43698A-72CC-448E-9D88-EA36B36757EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.TestDataCreator", "ReverseAnalytics.TestDataCreator\ReverseAnalytics.TestDataCreator.csproj", "{BC2C2A53-2414-4CC4-B89A-1A0889516F10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseAnalytics.Services", "ReverseAnalytics.Services\ReverseAnalytics.Services.csproj", "{C90C86A0-123C-4F88-B9B0-813D518A5E38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.Migrations.Sqlite", "Migrations\ReverseAnalytics.Migrations.Sqlite\ReverseAnalytics.Migrations.Sqlite.csproj", "{6863C9D3-3718-468C-90E6-CFF14663E70B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.Migrations.SqlServer", "Migrations\ReverseAnalytics.Migrations.SqlServer\ReverseAnalytics.Migrations.SqlServer.csproj", "{BFDF8903-DF51-46A8-8436-D7054A61B47D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Migrations", "Migrations", "{E83F6F45-0BBA-48B6-9D31-A4749A435983}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.Services", "ReverseAnalytics.Services\ReverseAnalytics.Services.csproj", "{E8F4610B-0CDB-491C-A260-8DAE4025522E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8978CC52-2806-4816-A2A0-6B4E4CD55F57}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReverseAnalytics.Tests.Unit", "Tests\ReverseAnalytics.Tests.Unit\ReverseAnalytics.Tests.Unit.csproj", "{5CD082B1-1139-40F3-A445-B30C0CA9EB0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReverseAnalytics.Tests.Api", "ReverseAnalytics.Tests.Api\ReverseAnalytics.Tests.Api.csproj", "{EEFE90AB-E2C8-44B3-9FC6-B7235176AB64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,17 +43,39 @@ Global
 		{1F92F8F0-A90D-490E-8DDF-642C6F179E04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F92F8F0-A90D-490E-8DDF-642C6F179E04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F92F8F0-A90D-490E-8DDF-642C6F179E04}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8B43698A-72CC-448E-9D88-EA36B36757EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B43698A-72CC-448E-9D88-EA36B36757EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B43698A-72CC-448E-9D88-EA36B36757EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8B43698A-72CC-448E-9D88-EA36B36757EF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C90C86A0-123C-4F88-B9B0-813D518A5E38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C90C86A0-123C-4F88-B9B0-813D518A5E38}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C90C86A0-123C-4F88-B9B0-813D518A5E38}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C90C86A0-123C-4F88-B9B0-813D518A5E38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC2C2A53-2414-4CC4-B89A-1A0889516F10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC2C2A53-2414-4CC4-B89A-1A0889516F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC2C2A53-2414-4CC4-B89A-1A0889516F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC2C2A53-2414-4CC4-B89A-1A0889516F10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6863C9D3-3718-468C-90E6-CFF14663E70B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6863C9D3-3718-468C-90E6-CFF14663E70B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6863C9D3-3718-468C-90E6-CFF14663E70B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6863C9D3-3718-468C-90E6-CFF14663E70B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFDF8903-DF51-46A8-8436-D7054A61B47D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFDF8903-DF51-46A8-8436-D7054A61B47D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFDF8903-DF51-46A8-8436-D7054A61B47D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFDF8903-DF51-46A8-8436-D7054A61B47D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8F4610B-0CDB-491C-A260-8DAE4025522E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8F4610B-0CDB-491C-A260-8DAE4025522E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8F4610B-0CDB-491C-A260-8DAE4025522E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8F4610B-0CDB-491C-A260-8DAE4025522E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CD082B1-1139-40F3-A445-B30C0CA9EB0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CD082B1-1139-40F3-A445-B30C0CA9EB0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CD082B1-1139-40F3-A445-B30C0CA9EB0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CD082B1-1139-40F3-A445-B30C0CA9EB0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEFE90AB-E2C8-44B3-9FC6-B7235176AB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEFE90AB-E2C8-44B3-9FC6-B7235176AB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEFE90AB-E2C8-44B3-9FC6-B7235176AB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEFE90AB-E2C8-44B3-9FC6-B7235176AB64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6863C9D3-3718-468C-90E6-CFF14663E70B} = {E83F6F45-0BBA-48B6-9D31-A4749A435983}
+		{BFDF8903-DF51-46A8-8436-D7054A61B47D} = {E83F6F45-0BBA-48B6-9D31-A4749A435983}
+		{5CD082B1-1139-40F3-A445-B30C0CA9EB0D} = {8978CC52-2806-4816-A2A0-6B4E4CD55F57}
+		{EEFE90AB-E2C8-44B3-9FC6-B7235176AB64} = {8978CC52-2806-4816-A2A0-6B4E4CD55F57}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB93A27F-394C-45FF-B005-7DDE4ED5800A}

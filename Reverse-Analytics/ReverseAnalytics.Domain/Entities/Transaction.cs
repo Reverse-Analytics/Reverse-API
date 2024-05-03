@@ -1,16 +1,13 @@
 ﻿using ReverseAnalytics.Domain.Common;
 using ReverseAnalytics.Domain.Enums;
 
-namespace ReverseAnalytics.Domain.Entities
-{
-    public class Transaction : BaseAuditableEntity
-    {
-        public decimal TotalDue { get; set; }
-        public decimal TotalPaid { get; set; }
-        public DateTime TransactionDate { get; set; }
-        public string? Comments { get; set; }
-        public TransactionStatusType Status { get; set; }
+namespace ReverseAnalytics.Domain.Entities;
 
-        public virtual Debt Debt { get; set; }
-    }
+public class Transaction : BaseAuditableEntity
+{
+    public DateTime Date { get; set; }
+    public int? SourceId { get; set; }
+    public decimal Amount { get; set; }
+    public TransactionType Type { get; set; }
+    public TransactionSource? Source { get; set; }
 }

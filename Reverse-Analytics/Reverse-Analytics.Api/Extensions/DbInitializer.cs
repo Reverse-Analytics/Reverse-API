@@ -1,468 +1,192 @@
-﻿using Bogus;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.Extensions.Options;
+using Reverse_Analytics.Api.Configurations;
 using ReverseAnalytics.Domain.Entities;
-using ReverseAnalytics.Domain.Enums;
 using ReverseAnalytics.Infrastructure.Persistence;
-using System.Diagnostics;
+using ReverseAnalytics.TestDataCreator;
 
-namespace Reverse_Analytics.Api.Extensions
+namespace Reverse_Analytics.Api.Extensions;
+
+public class DatabaseSeeder(ApplicationDbContext context, IOptions<DataSeedConfiguration> options)
 {
-    internal static class DbInitializer
+    private readonly ApplicationDbContext _context = context;
+    private readonly DataSeedConfiguration _options = options.Value;
+    private readonly Fakers _faker = new();
+
+    public void Seed()
     {
-        public static IApplicationBuilder SeedDatabase(this IApplicationBuilder app)
-        {
-            ArgumentNullException.ThrowIfNull(app, nameof(app));
-
-            using var scope = app.ApplicationServices.CreateScope();
-            var services = scope.ServiceProvider;
-
-            try
-            {
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                var identityContext = services.GetRequiredService<ApplicationIdentityDbContext>();
-                var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-
-                DbSeeder.Initialize(context, identityContext, userManager);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-
-            return app;
-        }
+        GenerateProductCategories();
+        GenerateProducts();
+        GenerateCustomers();
+        GenerateSales();
+        GenerateSaleItems();
+        GenerateSuppliers();
+        GenerateSupplies();
+        GenerateSupplyItems();
+        GenerateTransactions();
     }
 
-    internal class DbSeeder
+    private void GenerateProductCategories()
     {
-        private static readonly Faker _faker = new();
-        private static readonly Random _random = new();
+        if (_context.ProductCategories.Any()) return;
 
-        public static void Initialize(ApplicationDbContext context, ApplicationIdentityDbContext identityContext, UserManager<IdentityUser> userManager)
+        HashSet<string> categoryNames = [];
+
+        for (int i = 0; i < _options.CategoriesCount; i++)
         {
-            try
+            int attempts = 0;
+            var category = _faker.ProductCategory().Generate();
+
+            // try to generate only unique values
+            while (categoryNames.Contains(category.Name) && attempts < 100)
             {
-                //CreateProductCategories(context);
-                //CreateProducts(context);
-                //CreateCustomers(context);
-                //CreateSales(context);
-                //CreateSaleDetails(context);
-                //CreateSaleDebts(context);
-                //CreateSuppliers(context);
-                //CreateSupplyDebts(context);
-                //CreateSupplies(context);
-                //CreateSupplyDetails(context);
-                //CreateInventories(context);
-                //CreateInventoryDetails(context);
-                //CreateRoles(identityContext);
-                //CreateUsers(identityContext, userManager);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-        }
-
-
-        private static void CreateProductCategories(ApplicationDbContext context)
-        {
-            if (context.ProductCategories.Any()) return;
-
-            List<ProductCategory> productCategories = new();
-            var fakeCategories = _faker.Commerce.Categories(25);
-
-            for (int i = 0; i < 25; i++)
-            {
-                productCategories.Add(
-                    new ProductCategory()
-                    {
-                        CategoryName = fakeCategories[i]
-                    });
+                category = _faker.ProductCategory().Generate();
+                attempts++;
             }
 
-            context.ProductCategories.AddRange(productCategories);
-            context.SaveChanges();
-        }
-
-        private static void CreateProducts(ApplicationDbContext context)
-        {
-            if (context.Products.Any()) return;
-
-            var categories = context.ProductCategories.ToList();
-            List<Product> products = new();
-
-            foreach (var category in categories)
+            // if unable to generate unique value, don't add to context
+            if (categoryNames.Contains(category.Name))
             {
-                int numberOfProducts = _random.Next(1, 25);
-
-                for (int i = 0; i < numberOfProducts; i++)
-                {
-                    products.Add(
-                        new Product()
-                        {
-                            ProductCode = _faker.Commerce.ProductAdjective(),
-                            ProductName = _faker.Commerce.ProductName(),
-                            Volume = (double)(_random.NextDouble() * _random.Next(1, 500)),
-                            Weight = (double)(_random.NextDouble() * _random.Next(1, 600)),
-                            SupplyPrice = Math.Round((decimal)_random.NextDouble() * 500, 2),
-                            SalePrice = Math.Round((decimal)_random.NextDouble() * 800, 2),
-                            UnitOfMeasurement = _faker.Random.Enum<UnitOfMeasurement>(),
-                            CategoryId = category.Id
-                        });
-                }
+                continue;
             }
 
-            context.Products.AddRange(products);
-            context.SaveChanges();
+            _context.ProductCategories.Add(category);
         }
 
-        private static void CreateCustomers(ApplicationDbContext context)
+        _context.SaveChanges();
+    }
+
+    private void GenerateProducts()
+    {
+        if (_context.Products.Any()) return;
+
+        HashSet<string> productNames = [];
+        var categories = _context.ProductCategories.Select(x => x.Id).ToArray();
+
+        for (int i = 0; i < _options.ProductsCount; i++)
         {
-            if (context.Customers.Any()) return;
+            int attempts = 0;
+            var product = _faker.Product(categories).Generate();
 
-            // Customers
-            List<Customer> customers = new(50);
-
-            for (int i = 0; i < 50; i++)
+            // try to generate only unique values
+            while (productNames.Contains(product.Name) && attempts < 100)
             {
-                customers.Add(new Customer()
-                {
-                    FullName = _faker.Person.FullName,
-                    CompanyName = _faker.Company.CompanyName(),
-                    Address = _faker.Address.FullAddress(),
-                    PhoneNumber = _faker.Phone.PhoneNumber("(###) ##-###-##-##"),
-                    Balance = _faker.Finance.Amount(0, 10000000),
-                    Discount = _faker.Random.Double(0, 100),
-                    IsActive = _faker.Random.Bool()
-                });
+                product = _faker.Product(categories).Generate();
+                attempts++;
             }
 
-            context.Customers.AddRange(customers);
-            context.SaveChanges();
-        }
-
-        private static void CreateSales(ApplicationDbContext context)
-        {
-            if (context.Sales.Any()) return;
-
-            var customers = context.Customers.ToList();
-            List<Sale> sales = new();
-
-            foreach (var customer in customers)
+            // if unable to generate unique value, don't add to context
+            if (productNames.Contains(product.Name))
             {
-                int salesCount = _random.Next(5, 25);
-
-                for (int i = 0; i < salesCount; i++)
-                {
-                    var totalDue = decimal.Round(_faker.Random.Decimal(10, 5000), 2);
-                    var totalPaid = decimal.Round(_faker.Random.Decimal(0, totalDue), 2);
-                    var discountPercentage = _faker.Random.Double(0, 100);
-                    var discountTotal = decimal.Round((totalDue * (decimal)discountPercentage) / 100, 2);
-
-                    sales.Add(
-                        new Sale()
-                        {
-                            TotalDue = totalDue,
-                            TotalPaid = totalPaid,
-                            TransactionDate = _faker.Date.Between(DateTime.Now.AddYears(-1), DateTime.Now),
-                            Comments = _faker.Lorem.Sentence(),
-                            Status = _faker.Random.Enum<TransactionStatusType>(),
-                            Receipt = _faker.Random.Guid().ToString(),
-                            Discount = discountTotal,
-                            SaleType = _faker.Random.Enum<SaleType>(),
-                            CustomerId = customer.Id
-                        });
-                }
+                continue;
             }
 
-            context.Sales.AddRange(sales);
-            context.SaveChanges();
+            _context.Products.Add(product);
         }
 
-        private static void CreateSaleDetails(ApplicationDbContext context)
+        _context.SaveChanges();
+    }
+
+    private void GenerateCustomers()
+    {
+        if (_context.Customers.Any()) return;
+
+        var customers = _faker.Customer().Generate(_options.CustomersCount);
+
+        _context.Customers.AddRange(customers);
+        _context.SaveChanges();
+    }
+
+    private void GenerateSales()
+    {
+        if (_context.Sales.Any()) return;
+
+        var customers = _context.Customers.Select(x => x.Id).ToArray();
+        var sales = _faker.Sale(customers).Generate(_options.SalesCount);
+
+        _context.Sales.AddRange(sales);
+        _context.SaveChanges();
+    }
+
+    private void GenerateSaleItems()
+    {
+        if (_context.SaleItems.Any()) return;
+
+        var sales = _context.Sales.Select(x => x.Id).ToArray();
+        var products = _context.Products.Select(x => x.Id).ToArray();
+        var saleItems = _faker.SaleItems(sales, products).Generate(_options.SaleItemsCount);
+
+        _context.SaleItems.AddRange(saleItems);
+        _context.SaveChanges();
+    }
+
+    private void GenerateSuppliers()
+    {
+        if (_context.Suppliers.Any()) return;
+
+        var suppliers = _faker.Supplier().Generate(_options.SuppliersCount);
+
+        _context.Suppliers.AddRange(suppliers);
+        _context.SaveChanges();
+    }
+
+    private void GenerateSupplies()
+    {
+        if (_context.Supplies.Any()) return;
+
+        var suppliers = _context.Suppliers.Select(x => x.Id).ToArray();
+        var suppplies = _faker.Supply(suppliers).Generate(_options.SuppliesCount);
+
+        _context.Supplies.AddRange(suppplies);
+        _context.SaveChanges();
+    }
+
+    private void GenerateSupplyItems()
+    {
+        if (_context.SupplyItems.Any()) return;
+
+        var supplies = _context.Supplies.Select(x => x.Id).ToArray();
+        var products = _context.Products.Select(x => x.Id).ToArray();
+        var supplyItems = _faker.SupplyItems(supplies, products).Generate(_options.SupplyItemsCount);
+
+        _context.SupplyItems.AddRange(supplyItems);
+        _context.SaveChanges();
+    }
+
+    private void GenerateTransactions()
+    {
+        if (_context.Transactions.Any()) return;
+
+        var sales = _context.Sales.ToArray();
+        var supplies = _context.Supplies.ToArray();
+
+        foreach (var sale in sales)
         {
-            if (context.SaleDetails.Any()) return;
-
-            var sales = context.Sales.ToList();
-            var products = context.Products.ToList();
-            List<SaleDetail> orderItems = new();
-
-            foreach (var sale in sales)
+            var transaction = new Transaction
             {
-                var orderItemsCount = _random.Next(1, 15);
+                Date = sale.Date,
+                Amount = sale.GetTransactionAmount(),
+                Source = sale.TransactionSource,
+                Type = sale.TransactionType,
+                SourceId = sale.GetTransactionSourceId()
+            };
 
-                for (int i = 0; i < orderItemsCount; i++)
-                {
-                    orderItems.Add(
-                        new SaleDetail()
-                        {
-                            Quantity = _random.Next(1, 20),
-                            UnitPrice = decimal.Round(_faker.Random.Decimal(5, 500), 2),
-                            SaleId = sale.Id,
-                            ProductId = products[_random.Next(0, products.Count)]?.Id ?? 1
-                        });
-                }
-            }
-
-            context.SaleDetails.AddRange(orderItems);
-            context.SaveChanges();
+            _context.Transactions.Add(transaction);
         }
 
-        private static void CreateSaleDebts(ApplicationDbContext context)
+        foreach (var supply in supplies)
         {
-            if (context.Debts.Any()) return;
-
-            List<Debt> debts = new List<Debt>();
-            var sales = context.Sales.ToList();
-
-            foreach (var sale in sales)
+            var transaction = new Transaction
             {
-                if (_faker.Random.Bool())
-                {
-                    var totalAmount = sale.TotalDue - sale.TotalPaid;
-                    var remainedAmount = _faker.Random.Decimal(0, totalAmount);
+                Date = supply.Date,
+                Amount = supply.GetTransactionAmount(),
+                Source = supply.TransactionSource,
+                Type = supply.TransactionType,
+                SourceId = supply.GetTransactionSourceId()
+            };
 
-                    DateTime? paidDate = remainedAmount == 0 ? _faker.Date.Between(sale.TransactionDate, DateTime.Now.AddMonths(5)) : null;
-                    DebtStatus status = remainedAmount == 0 ? DebtStatus.Closed : DebtStatus.PaymentRequired;
-
-                    debts.Add(new Debt()
-                    {
-                        TotalAmount = totalAmount,
-                        Remained = remainedAmount,
-                        PaidDate = paidDate,
-                        DueDate = _faker.Date.Between(sale.TransactionDate, DateTime.Now.AddMonths(5)),
-                        Status = status,
-                        TransactionId = sale.Id
-                    });
-                }
-            }
-
-            context.Debts.AddRange(debts);
-            context.SaveChanges();
+            _context.Transactions.Add(transaction);
         }
 
-        private static void CreateSuppliers(ApplicationDbContext context)
-        {
-            if (context.Suppliers.Any()) return;
-
-            List<Supplier> suppliers = new List<Supplier>();
-
-            for (int i = 0; i < 25; i++)
-            {
-                suppliers.Add(
-                    new Supplier()
-                    {
-                        FullName = _faker.Person.FullName,
-                        Address = _faker.Address.FullAddress(),
-                        PhoneNumber = _faker.Phone.PhoneNumber("(###) ##-###-##-##"),
-                        CompanyName = _faker.Company.CompanyName(),
-                        Balance = _faker.Random.Decimal(0, 10000),
-                        IsActive = _faker.Random.Bool()
-                    });
-            }
-
-            context.Suppliers.AddRange(suppliers);
-            context.SaveChanges();
-        }
-
-        private static void CreateSupplies(ApplicationDbContext context)
-        {
-            if (context.Supplies.Any()) return;
-
-            var suppliers = context.Suppliers.ToList();
-            List<Supply> supplies = new();
-
-            foreach (var supplier in suppliers)
-            {
-                int suppliesCount = _random.Next(5, 25);
-
-                for (int i = 0; i < suppliesCount; i++)
-                {
-                    var totalDue = decimal.Round(_faker.Random.Decimal(10, 5000), 2);
-                    var totalPaid = decimal.Round(_faker.Random.Decimal(100, totalDue), 2);
-
-                    supplies.Add(
-                        new Supply()
-                        {
-                            TotalDue = totalDue,
-                            TotalPaid = totalPaid,
-                            TransactionDate = _faker.Date.Between(DateTime.Now.AddYears(-1), DateTime.Now),
-                            Comments = _faker.Lorem.Sentence(),
-                            Status = _faker.Random.Enum<TransactionStatusType>(),
-                            ReceivedBy = _faker.Name.FirstName(),
-                            SupplierId = supplier.Id
-                        });
-                }
-            }
-
-            context.Supplies.AddRange(supplies);
-            context.SaveChanges();
-        }
-
-        private static void CreateSupplyDetails(ApplicationDbContext context)
-        {
-            if (context.SupplyDetails.Any()) return;
-
-            var supplies = context.Supplies.ToList();
-            var products = context.Products.ToList();
-            List<SupplyDetail> supplyDetails = new List<SupplyDetail>();
-
-            foreach (var supply in supplies)
-            {
-                int suppliesCount = _random.Next(1, 15);
-
-                for (int i = 0; i < suppliesCount; i++)
-                {
-                    supplyDetails.Add(new SupplyDetail()
-                    {
-                        Quantity = _random.Next(1, 20),
-                        UnitPrice = decimal.Round(_faker.Random.Decimal(5, 500), 2),
-
-                        SupplyId = supply.Id,
-                        ProductId = products[_random.Next(0, products.Count)]?.Id ?? 1
-                    });
-                }
-            }
-
-            context.SupplyDetails.AddRange(supplyDetails);
-            context.SaveChanges();
-        }
-
-        private static void CreateSupplyDebts(ApplicationDbContext context)
-        {
-            if (context.Debts.Any()) return;
-
-            List<Debt> debts = new List<Debt>();
-            var supplies = context.Supplies.ToList();
-
-            foreach (var supply in supplies)
-            {
-                if (_faker.Random.Bool())
-                {
-                    var totalAmount = supply.TotalDue - supply.TotalPaid;
-                    var remainedAmount = _faker.Random.Decimal(0, totalAmount);
-
-                    DateTime? paidDate = remainedAmount == 0 ? _faker.Date.Between(supply.TransactionDate, DateTime.Now.AddMonths(5)) : null;
-                    DebtStatus status = remainedAmount == 0 ? DebtStatus.Closed : DebtStatus.PaymentRequired;
-
-                    debts.Add(new Debt()
-                    {
-                        TotalAmount = totalAmount,
-                        Remained = remainedAmount,
-                        PaidDate = paidDate,
-                        DueDate = _faker.Date.Between(supply.TransactionDate, DateTime.Now.AddMonths(5)),
-                        Status = status
-                    });
-                }
-            }
-
-            context.Debts.AddRange(debts);
-            context.SaveChanges();
-        }
-
-        private static void CreateInventories(ApplicationDbContext context)
-        {
-            if (context.Inventories.Any()) return;
-
-            List<Inventory> inventories = new List<Inventory>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                inventories.Add(new Inventory(_faker.Lorem.Word()));
-            }
-
-            context.Inventories.AddRange(inventories);
-        }
-
-        private static void CreateInventoryDetails(ApplicationDbContext context)
-        {
-            if (context.InventoryDetails.Any()) return;
-
-            var inventories = context.Inventories.ToList();
-            var products = context.Products.ToList();
-            List<InventoryDetail> inventoryDetails = new List<InventoryDetail>();
-
-            foreach (var inventory in inventories)
-            {
-                var randomProducts = GetRandomProducts(products);
-
-                foreach (var product in randomProducts)
-                {
-                    inventoryDetails.Add(new InventoryDetail()
-                    {
-                        InventoryId = inventory.Id,
-                        ProductId = product.Id,
-                        ProductsRemained = _faker.Random.Double(0, 300)
-                    });
-                }
-            }
-
-            context.InventoryDetails.AddRange(inventoryDetails);
-            context.SaveChanges();
-        }
-
-        private static void CreateRoles(ApplicationIdentityDbContext context)
-        {
-            if (context.Roles.Any()) return;
-
-            List<IdentityRole> roles = new();
-
-            roles.Add(new IdentityRole
-            {
-                Name = "Visitor",
-                NormalizedName = "VISITOR"
-            });
-            roles.Add(new IdentityRole
-            {
-                Name = "Regular",
-                NormalizedName = "REGULAR"
-            });
-            roles.Add(new IdentityRole
-            {
-                Name = "Accountant",
-                NormalizedName = "ACCOUNTANT"
-            });
-            roles.Add(new IdentityRole
-            {
-                Name = "Manager",
-                NormalizedName = "MANAGER"
-            });
-            roles.Add(new IdentityRole
-            {
-                Name = "Administrator",
-                NormalizedName = "ADMINISTRATOR"
-            });
-
-            context.Roles.AddRange(roles);
-            context.SaveChanges();
-        }
-
-        private static void CreateUsers(ApplicationIdentityDbContext context, UserManager<IdentityUser> userManager)
-        {
-            if (context.Users.Any()) return;
-
-            var roles = context.Roles.ToList();
-
-            for (int i = 0; i < 20; i++)
-            {
-                var role = roles.ElementAt(_random.Next(0, roles.Count));
-
-                var user = new IdentityUser
-                {
-                    UserName = _faker.Internet.UserName(),
-                };
-
-                userManager.CreateAsync(user, $"qwerty{i}").Wait();
-                userManager.AddToRoleAsync(user, role.Name).Wait();
-            }
-        }
-
-        private static List<Product> GetRandomProducts(List<Product> products)
-        {
-            var half = products.Count / 2;
-            var start = _faker.Random.Int(0, half);
-
-            return new List<Product>(products.Skip(start).Take(half));
-        }
+        _context.SaveChanges();
     }
 }

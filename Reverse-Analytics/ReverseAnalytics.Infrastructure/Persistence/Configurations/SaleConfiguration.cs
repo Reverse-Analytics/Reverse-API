@@ -1,33 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ReverseAnalytics.Domain.Entities;
-using ReverseAnalytics.Domain.Enums;
 
-namespace ReverseAnalytics.Infrastructure.Persistence.Configurations
+namespace ReverseAnalytics.Infrastructure.Persistence.Configurations;
+
+internal class SaleConfiguration : IEntityTypeConfiguration<Sale>
 {
-    internal class SaleConfiguration : IEntityTypeConfiguration<Sale>
+    public void Configure(EntityTypeBuilder<Sale> builder)
     {
-        public void Configure(EntityTypeBuilder<Sale> builder)
-        {
-            builder.ToTable("Sale");
+        builder.ToTable(nameof(Sale));
 
-            builder.HasOne(s => s.Customer)
-                .WithMany(c => c.Sales)
-                .HasForeignKey(s => s.CustomerId);
+        builder.HasOne(s => s.Customer)
+            .WithMany(c => c.Sales)
+            .HasForeignKey(s => s.CustomerId);
+        builder.HasMany(s => s.SaleItems)
+            .WithOne(si => si.Sale)
+            .HasForeignKey(si => si.SaleId);
 
-            builder.HasMany(s => s.OrderDetails)
-                .WithOne(od => od.Sale)
-                .HasForeignKey(od => od.SaleId);
+        builder.Property(s => s.Date)
+            .IsRequired();
+        builder.Property(s => s.Comments)
+            .HasMaxLength(ConfigurationConstants.LargeStringMaxLength)
+            .IsRequired(false);
+        builder.Property(s => s.TotalDue)
+            .HasPrecision(18, 2)
+            .IsRequired();
+        builder.Property(s => s.TotalPaid)
+            .HasPrecision(18, 2)
+            .IsRequired();
+        builder.Property(s => s.TotalDiscount)
+            .HasPrecision(18, 2)
+            .IsRequired();
+        builder.Property(s => s.SaleType)
+            .IsRequired();
+        builder.Property(s => s.Status)
+            .IsRequired();
+        builder.Property(s => s.PaymentType)
+            .IsRequired();
+        builder.Property(s => s.Currency)
+            .IsRequired();
 
-            builder.Property(s => s.Receipt)
-                .IsRequired()
-                .HasMaxLength(250);
-            builder.Property(s => s.Discount)
-                .HasColumnType("money")
-                .HasDefaultValue(0);
-            builder.Property(s => s.SaleType)
-                .HasDefaultValue(SaleType.Other)
-                .IsRequired();
-        }
+        builder.Ignore(s => s.TransactionSource);
+        builder.Ignore(s => s.TransactionType);
     }
 }

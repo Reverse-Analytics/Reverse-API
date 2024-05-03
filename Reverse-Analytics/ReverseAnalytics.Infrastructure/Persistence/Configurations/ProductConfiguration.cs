@@ -2,41 +2,43 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ReverseAnalytics.Domain.Entities;
 
-namespace ReverseAnalytics.Infrastructure.Persistence.Configurations
+namespace ReverseAnalytics.Infrastructure.Persistence.Configurations;
+
+internal class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
-    internal class ProductConfiguration : IEntityTypeConfiguration<Product>
+    public void Configure(EntityTypeBuilder<Product> builder)
     {
-        public void Configure(EntityTypeBuilder<Product> builder)
-        {
-            builder.ToTable("Product");
+        builder.ToTable(nameof(Product));
 
-            builder.HasKey(p => p.Id);
+        builder.HasKey(p => p.Id);
 
-            builder.HasOne(p => p.Category)
-                .WithMany(pc => pc.Products)
-                .HasForeignKey(p => p.CategoryId);
+        builder.HasOne(p => p.Category)
+            .WithMany(pc => pc.Products)
+            .HasForeignKey(p => p.CategoryId);
+        builder.HasMany(p => p.SaleItems)
+            .WithOne(si => si.Product)
+            .HasForeignKey(si => si.ProductId);
 
-            builder.HasMany(p => p.SaleDetails)
-                .WithOne(od => od.Product)
-                .HasForeignKey(od => od.ProductId);
-            builder.HasMany(p => p.PurchaseDetails)
-                .WithOne(pd => pd.Product)
-                .HasForeignKey(pd => pd.ProductId);
-
-            builder.Property(p => p.ProductCode)
-                .HasMaxLength(50)
-                .IsRequired();
-            builder.Property(p => p.ProductName)
-                .HasMaxLength(250)
-                .IsRequired();
-            builder.Property(p => p.Volume)
-                .HasPrecision(2);
-            builder.Property(p => p.Weight)
-                .HasPrecision(2);
-            builder.Property(p => p.SupplyPrice)
-                .HasColumnType("money");
-            builder.Property(p => p.SalePrice)
-                .HasColumnType("money");
-        }
+        builder.Property(p => p.Name)
+            .HasMaxLength(ConfigurationConstants.DefaultStringMaxLength)
+            .IsRequired();
+        builder.Property(p => p.Code)
+            .HasMaxLength(ConfigurationConstants.DefaultStringMaxLength)
+            .IsRequired();
+        builder.Property(p => p.Description)
+            .HasMaxLength(ConfigurationConstants.LargeStringMaxLength)
+            .IsRequired(false);
+        builder.Property(p => p.SalePrice)
+            .HasPrecision(18, 2)
+            .IsRequired();
+        builder.Property(p => p.SupplyPrice)
+            .HasPrecision(18, 2)
+            .IsRequired();
+        builder.Property(p => p.Volume)
+            .HasPrecision(18, 2)
+            .IsRequired(false);
+        builder.Property(p => p.Weight)
+            .HasPrecision(18, 2)
+            .IsRequired(false);
     }
 }

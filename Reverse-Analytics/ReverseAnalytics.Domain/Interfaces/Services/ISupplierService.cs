@@ -1,13 +1,16 @@
 ﻿using ReverseAnalytics.Domain.DTOs.Supplier;
+using ReverseAnalytics.Domain.Entities;
+using ReverseAnalytics.Domain.QueryParameters;
 
-namespace ReverseAnalytics.Domain.Interfaces.Services
+namespace ReverseAnalytics.Domain.Interfaces.Services;
+
+public interface ISupplierService
 {
-    public interface ISupplierService
-    {
-        public Task<IEnumerable<SupplierDto>> GetAllSuppliersAsync(string? searchString);
-        public Task<SupplierDto> GetSupplierByIdAsync(int id);
-        public Task<SupplierDto> CreateSupplierAsync(SupplierForCreateDto supplierToCreate);
-        public Task UpdateSupplierAsync(SupplierForUpdateDto supplierToUpdate);
-        public Task DeleteSupplierAsync(int id);
-    }
+    Task<IEnumerable<SupplierDto>> GetAllAsync();
+    Task<IEnumerable<SupplierDto>> GetAllAsync(SupplierQueryParameters queryParameters);
+    Task<IEnumerable<Supply>> GetSuppliesAsync(int supplierId);
+    Task<SupplierDto> GetByIdAsync(int id);
+    Task<SupplierDto> CreateAsync(SupplierForCreateDto supplierToCreate);
+    Task<SupplierDto> UpdateAsync(SupplierForUpdateDto supplierToUpdate);
+    Task<SupplierDto> DeleteAsync(int id);
 }

@@ -1,9 +1,11 @@
-﻿using ReverseAnalytics.Domain.Entities;
+﻿using ReverseAnalytics.Domain.Common;
+using ReverseAnalytics.Domain.Entities;
+using ReverseAnalytics.Domain.QueryParameters;
 
-namespace ReverseAnalytics.Domain.Interfaces.Repositories
+namespace ReverseAnalytics.Domain.Interfaces.Repositories;
+
+public interface IProductRepository : IRepositoryBase<Product>
 {
-    public interface IProductRepository : IRepositoryBase<Product>
-    {
-        Task<IEnumerable<Product>> FindAllProductsAsync(string? searchString, int? categoryId, int pageSize, int pageNumber);
-    }
+    Task<PaginatedList<Product>> FindAllAsync(ProductQueryParameters queryParameters);
+    Task<IEnumerable<Product>> FindByCategoryIdAsync(int categoryId);
 }

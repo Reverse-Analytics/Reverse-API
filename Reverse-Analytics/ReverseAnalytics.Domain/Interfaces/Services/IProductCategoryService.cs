@@ -1,14 +1,16 @@
-﻿using ReverseAnalytics.Domain.DTOs.ProductCategory;
+﻿using ReverseAnalytics.Domain.Common;
+using ReverseAnalytics.Domain.DTOs.ProductCategory;
+using ReverseAnalytics.Domain.QueryParameters;
 
-namespace ReverseAnalytics.Domain.Interfaces.Services
+namespace ReverseAnalytics.Domain.Interfaces.Services;
+
+public interface IProductCategoryService
 {
-    public interface IProductCategoryService
-    {
-        Task<IEnumerable<ProductCategoryDto>?> GetProductCategoriesAsync();
-        Task<IEnumerable<ProductCategoryDto>?> GetProductCategoriesAsync(string? searchString);
-        Task<ProductCategoryDto?> GetProductCategoryByIdAsync(int id);
-        Task<ProductCategoryDto?> CreateProductCategoryAsync(ProductCategoryForCreateDto productCategoryToCreate);
-        Task UpdateProductCategoryAsync(ProductCategoryForUpdateDto productCategoryToUpdate);
-        Task DeleteProductCategoryAsync(int productCategoryId);
-    }
+    Task<IEnumerable<ProductCategoryDto>> GetAllAsync();
+    Task<(IEnumerable<ProductCategoryDto> Data, PaginationMetaData PaginationMetaData)> GetAllAsync(ProductCategoryQueryParameters queryParameters);
+    Task<IEnumerable<ProductCategoryDto>> GetAllByParentIdAsync(int parentId);
+    Task<ProductCategoryDto?> GetByIdAsync(int id);
+    Task<ProductCategoryDto> CreateAsync(ProductCategoryForCreateDto categoryToCreate);
+    Task<ProductCategoryDto> UpdateAsync(ProductCategoryForUpdateDto categoryToUpdate);
+    Task DeleteAsync(int id);
 }

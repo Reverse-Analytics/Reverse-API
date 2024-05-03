@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Identity;
+using Serilog;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Reverse_Analytics.Api.Extensions;
 using Reverse_Analytics.Api.Middlewares;
-using ReverseAnalytics.Infrastructure.Configurations;
 using ReverseAnalytics.Infrastructure.Persistence;
-using Serilog;
+using ReverseAnalytics.TestDataCreator;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -19,23 +18,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 
-// Add services to the container.
-builder.Services.AddInfrastructureServices(builder.Configuration);
-builder.Services.RegisterDependencyInjection();
-builder.Services.ConfigureValidationFilter();
-
-// Identity
-builder.Services.Configure<CustomTokenOptions>(builder.Configuration.GetSection("TokenOptions"));
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 4;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-})
-    .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services
+    .AddLogger()
+    .AddInfrastructure(builder.Configuration)
+    .AddRepositories()
+    .AddValidators()
+    .AddMappers()
+    .AddServices()
+    .AddSwagger()
+    .AddConfigurations(builder.Configuration);
 
 builder.Services.AddControllers(options =>
 {
@@ -49,18 +40,19 @@ builder.Services.AddControllers(options =>
     })
     .AddXmlDataContractSerializerFormatters();
 
-builder.Services.ConfigureAuthentication(builder.Configuration);
-
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
     app.SeedDatabase();
+
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var seeder = new DatabaseSeeder(context);
+    seeder.Seed();
 }
 
 app.UseMiddleware<ErrorHandlerMiddeware>();
@@ -74,3 +66,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

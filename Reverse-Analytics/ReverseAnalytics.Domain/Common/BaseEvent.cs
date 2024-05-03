@@ -1,8 +1,7 @@
 ﻿using MediatR;
 
-namespace ReverseAnalytics.Domain.Common
+namespace ReverseAnalytics.Domain.Common;
+
+public abstract class BaseEvent : INotification
 {
-    public abstract class BaseEvent : INotification
-    {
-    }
 }

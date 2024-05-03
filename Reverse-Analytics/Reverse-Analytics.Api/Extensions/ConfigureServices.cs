@@ -1,86 +1,113 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Reverse_Analytics.Api.Filters;
+using Reverse_Analytics.Api.Configurations;
 using ReverseAnalytics.Domain.Interfaces.Repositories;
-using ReverseAnalytics.Infrastructure.Configurations;
+using ReverseAnalytics.Domain.Interfaces.Services;
+using ReverseAnalytics.Domain.Validators.Product;
 using ReverseAnalytics.Infrastructure.Persistence;
 using ReverseAnalytics.Infrastructure.Persistence.Interceptors;
-using ReverseAnalytics.Repositories;
-using System.Text;
+using ReverseAnalytics.Infrastructure.Repositories;
+using ReverseAnalytics.Services;
 
-namespace Reverse_Analytics.Api.Extensions
+namespace Reverse_Analytics.Api.Extensions;
+
+public static class ConfigureServices
 {
-    public static class ConfigureServices
+    public static IServiceCollection AddLogger(this IServiceCollection services)
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddScoped<ICommonRepository, CommonRepository>();
-            services.AddScoped<IDebtRepository, DebtRepository>();
-            services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
-            services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<ICustomerRepository, CustomerRepository>();
-            services.AddScoped<ISaleRepository, SaleRepository>();
-            services.AddScoped<ISaleDetailRepository, SaleDetailRepository>();
-            services.AddScoped<ISupplierRepository, SupplierRepository>();
-            services.AddScoped<ISupplyRepository, SupplyRepository>();
-            services.AddScoped<ISupplyDetailRepository, SupplyDetailRepository>();
+        return services;
+    }
 
-            services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<AuditInterceptor>();
+        services.AddScoped<TransactionsInterceptor>();
+        var provider = configuration.GetValue("Provider", "SqlServer");
+
+        services.AddDbContext<ApplicationDbContext>(
+            options => _ = provider switch
+            {
+                "Sqlite" => options.UseSqlite(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    x => x.MigrationsAssembly("ReverseAnalytics.Migrations.Sqlite")),
+
+                "SqlServer" => options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    x => x.MigrationsAssembly("ReverseAnalytics.Migrations.SqlServer")),
+
+                _ => throw new InvalidOperationException($"Unsupported provider: {provider}.")
+            });
 
 #if DEBUG
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDbContext<ApplicationIdentityDbContext>(options =>
-                options.UseSqlite(configuration.GetConnectionString("DefaultIdentityConnection")));
 #else
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), builder =>
-                builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+        
 
-            services.AddDbContext<ApplicationIdentityDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultIdentityConnection"), builder =>
-                builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+        services.AddDbContext<ApplicationIdentityDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultIdentityConnection"), builder =>
+            builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 #endif
+        //services.AddScoped<ICommonRepository, CommonRepository>();
+        //services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+        //services.AddScoped<IProductRepository, ProductRepository>();
+        //services.AddScoped<ICustomerRepository, CustomerRepository>();
+        //services.AddScoped<ISaleRepository, SaleRepository>();
+        //services.AddScoped<ISaleItemRepository, SaleItemRepository>();
 
-            return services;
-        }
+        return services;
+    }
 
-        public static IServiceCollection ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
-        {
-            var tokenOptions = configuration.GetSection("TokenOptions").Get<CustomTokenOptions>();
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ISaleRepository, SaleRepository>();
+        services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<ISupplyRepository, SupplyRepository>();
+        services.AddScoped<ISupplyItemRepository, SupplyItemRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<ICommonRepository, CommonRepository>();
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = tokenOptions.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = tokenOptions.Audience,
-                        RequireExpirationTime = false,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.SecurityKey))
-                    };
-                });
+        return services;
+    }
 
-            return services;
-        }
+    public static IServiceCollection AddValidators(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssemblyContaining<ProductForCreateValidator>();
 
-        public static IServiceCollection ConfigureValidationFilter(this IServiceCollection services)
-        {
-            services.Configure<ApiBehaviorOptions>(options =>
-                options.SuppressModelStateInvalidFilter = true);
-            services.AddScoped<ValidationFilterAttribute>();
+        return services;
+    }
 
-            return services;
-        }
+    public static IServiceCollection AddMappers(this IServiceCollection services)
+    {
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+        return services;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddScoped<IProductCategoryService, ProductCategoryService>();
+        services.AddScoped<IProductService, ProductService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen();
+
+        return services;
+    }
+
+    public static IServiceCollection AddConfigurations(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<DataSeedConfiguration>(configuration.GetSection(DataSeedConfiguration.SECTION));
+
+        return services;
     }
 }

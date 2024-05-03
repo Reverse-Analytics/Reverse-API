@@ -1,13 +1,16 @@
 ﻿using ReverseAnalytics.Domain.DTOs.Sale;
+using ReverseAnalytics.Domain.DTOs.SaleItem;
+using ReverseAnalytics.Domain.QueryParameters;
 
-namespace ReverseAnalytics.Domain.Interfaces.Services
+namespace ReverseAnalytics.Domain.Interfaces.Services;
+
+public interface ISaleService
 {
-    public interface ISaleService
-    {
-        public Task<IEnumerable<SaleDto>> GetAllSalesAsync(int pageSize, int pageNumber);
-        public Task<SaleDto> GetSaleByIdAsync(int id);
-        public Task<SaleDto> CreateSaleAsync(SaleForCreateDto SaleToCreate);
-        public Task UpdateSaleAsync(SaleForUpdateDto SaleToUpdate);
-        public Task DeleteSaleAsync(int id);
-    }
+    Task<IEnumerable<SaleDto>> GetAllAsync();
+    Task<IEnumerable<SaleDto>> GetAllAsync(SaleQueryParameters queryParameters);
+    Task<IEnumerable<SaleItemDto>> GetItemsAsync(int saleId);
+    Task<SaleDto> GetByIdAsync(int id);
+    Task<SaleDto> CreateAsync(SaleForCreateDto saleToCreate);
+    Task<SaleDto> UpdateAsync(SaleForUpdateDto saleToUpdate);
+    Task<SaleDto> DeleteAsync(int id);
 }

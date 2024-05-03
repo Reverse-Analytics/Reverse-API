@@ -1,215 +1,63 @@
 ﻿using AutoMapper;
 using ReverseAnalytics.Domain.DTOs.Product;
 using ReverseAnalytics.Domain.Entities;
-using ReverseAnalytics.Domain.Exceptions;
 using ReverseAnalytics.Domain.Interfaces.Repositories;
 using ReverseAnalytics.Domain.Interfaces.Services;
+using ReverseAnalytics.Domain.QueryParameters;
 
-namespace ReverseAnalytics.Services
+namespace ReverseAnalytics.Services;
+
+public sealed class ProductService(ICommonRepository repository, IMapper mapper) : IProductService
 {
-    public class ProductService : IProductService
+    private readonly ICommonRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+    private readonly IMapper _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+
+    public async Task<IEnumerable<ProductDto>> GetAllAsync()
     {
-        private readonly ICommonRepository _repository;
-        private readonly IMapper _mapper;
+        var entities = await _repository.Product.FindAllAsync();
 
-        public ProductService(ICommonRepository repository, IMapper mapper)
-        {
-            _repository = repository;
-            _mapper = mapper;
-        }
+        return _mapper.Map<IEnumerable<ProductDto>>(entities);
+    }
 
-        public async Task<IEnumerable<ProductDto>?> GetProductsAsync()
-        {
-            try
-            {
-                var products = await _repository.Product.FindAllAsync();
+    public async Task<IEnumerable<ProductDto>> GetAllAsync(ProductQueryParameters queryParameters)
+    {
+        var entities = await _repository.Product.FindAllAsync(queryParameters);
 
-                if (products is null)
-                {
-                    return null;
-                }
+        return _mapper.Map<IEnumerable<ProductDto>>(entities);
+    }
 
-                var productDtos = _mapper.Map<IEnumerable<ProductDto>?>(products);
+    public async Task<IEnumerable<ProductDto>> GetByCategoryAsync(int categoryId)
+    {
+        var entities = await _repository.Product.FindByCategoryIdAsync(categoryId);
 
-                if (productDtos is null)
-                {
-                    throw new AutoMapperMappingException($"Could not map {typeof(Product)} Entities to {typeof(ProductDto)}.");
-                }
+        return _mapper.Map<IEnumerable<ProductDto>>(entities);
+    }
 
-                return productDtos;
-            }
-            catch (NotFoundException ex)
-            {
-                throw ex;
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("There was an error retrieving Products.", ex);
-            }
-        }
+    public async Task<ProductDto> GetByIdAsync(int id)
+    {
+        var entity = await _repository.Product.FindByIdAsync(id);
 
-        public async Task<IEnumerable<ProductDto>?> GetProductsAsync(string? searchString, int? categoryId, int pageSize, int pageNumber)
-        {
-            try
-            {
-                var products = await _repository.Product.FindAllProductsAsync(searchString, categoryId, pageSize, pageNumber);
+        return _mapper.Map<ProductDto>(entity);
+    }
 
-                if (products is null)
-                {
-                    return null;
-                }
+    public async Task<ProductDto> CreateAsync(ProductForCreateDto productToCreate)
+    {
+        var entity = _mapper.Map<Product>(productToCreate);
+        var createdEntity = await _repository.Product.CreateAsync(entity);
 
-                var productDtos = _mapper.Map<IEnumerable<ProductDto>?>(products);
+        return _mapper.Map<ProductDto>(createdEntity);
+    }
 
-                if (productDtos is null)
-                {
-                    throw new AutoMapperMappingException($"Could not map {typeof(Product)} Entities to {typeof(ProductDto)}.");
-                }
+    public async Task DeleteAsync(int id)
+    {
+        await _repository.Product.DeleteAsync(id);
+    }
 
-                return productDtos;
-            }
-            catch (NotFoundException ex)
-            {
-                throw ex;
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("There was an error retrieving product categories.", ex);
-            }
-        }
+    public async Task<ProductDto> UpdateAsync(ProductForUpdateDto productToUpdate)
+    {
+        var entity = _mapper.Map<Product>(productToUpdate);
+        var updatedEntity = await _repository.Product.UpdateAsync(entity);
 
-        public async Task<ProductDto?> GetProductByIdAsync(int id)
-        {
-            try
-            {
-                var product = await _repository.Product.FindByIdAsync(id);
-
-                if(product is null)
-                {
-                    return null;
-                }
-
-                var productDto = _mapper.Map<ProductDto>(product);
-
-                if (productDto is null)
-                {
-                    throw new AutoMapperMappingException($"Could not map {typeof(Product)} Entity to {typeof(ProductDto)}.");
-                }
-
-                return productDto;
-            }
-            catch (NotFoundException ex)
-            {
-                throw ex;
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("There was an error retrieving product categories.", ex);
-            }
-        }
-
-        public async Task<ProductDto> CreateProductAsync(ProductForCreateDto productToCreate)
-        {
-            try
-            {
-                if(productToCreate is null)
-                {
-                    throw new ArgumentNullException(nameof(productToCreate));
-                }
-
-                var productEntity = _mapper.Map<Product>(productToCreate);
-
-                if(productEntity is null)
-                {
-                    throw new AutoMapperMappingException($"Could not map {typeof(ProductForCreateDto)} to {typeof(Product)} Entity.");
-                }
-
-                productEntity = _repository.Product.Create(productEntity);
-                await _repository.Product.SaveChangesAsync();
-
-                var productDto = _mapper.Map<ProductDto>(productEntity);
-
-                if(productDto is null)
-                {
-                    throw new AutoMapperMappingException($"Could not map {typeof(Product)} Entity to {typeof(ProductDto)}.");
-                }
-
-                return productDto;
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw ex;
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("There was an error while adding new Product.", ex);
-            }
-        }
-
-        public async Task UpdateProductAsync(ProductForUpdateDto productToUpdate)
-        {
-            try
-            {
-                if(productToUpdate is null)
-                {
-                    throw new ArgumentNullException(nameof(productToUpdate));
-                }
-
-                var productEntity = _mapper.Map<Product>(productToUpdate);
-
-                if(productEntity is null)
-                {
-                    throw new AutoMapperMappingException($"Could not map {typeof(ProductForUpdateDto)} to {typeof(Product)} Entity.");
-                }
-
-                _repository.Product.Update(productEntity);
-                await _repository.Product.SaveChangesAsync();
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw ex;
-            }
-            catch (AutoMapperMappingException ex)
-            {
-                throw ex;
-            }
-            catch (NotFoundException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("There was an error while updating Product.", ex);
-            }
-        }
-
-        public async Task DeleteProductAsync(int id)
-        {
-            try
-            {
-                _repository.Product.Delete(id);
-                await _repository.Product.SaveChangesAsync();
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"There was an error deleting Product with id: {id}.", ex);
-            }
-        }
+        return _mapper.Map<ProductDto>(updatedEntity);
     }
 }

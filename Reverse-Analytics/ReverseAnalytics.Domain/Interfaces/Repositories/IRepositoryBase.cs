@@ -1,18 +1,29 @@
-﻿namespace ReverseAnalytics.Domain.Interfaces.Repositories
+﻿using ReverseAnalytics.Domain.Common;
+using ReverseAnalytics.Domain.QueryParameters;
+
+namespace ReverseAnalytics.Domain.Interfaces.Repositories;
+
+public interface IRepositoryBase<TEntity> where TEntity : BaseEntity
 {
-    public interface IRepositoryBase<T> where T : class
-    {
-        Task<IEnumerable<T>> FindAllAsync(int pageSize = 0, int pageNumber = 0);
-        Task<T?> FindByIdAsync(int id);
-        T Create(T entity);
-        void CreateRange(IEnumerable<T> entities);
-        void Update(T entity);
-        void UpdateRange(IEnumerable<T> entities);
-        void Delete(T entity);
-        void DeleteRange(IEnumerable<T> entities);
-        void Delete(int id);
-        void DeleteRange(IEnumerable<int> ids);
-        Task<bool> SaveChangesAsync();
-        Task<bool> EntityExistsAsync(int id);
-    }
+    Task<IEnumerable<TEntity>> FindAllAsync();
+
+    Task<PaginatedList<TEntity>> FindAllAsync(PaginatedQueryParameters queryParameters);
+
+    Task<TEntity?> FindByIdAsync(int id);
+
+    Task<TEntity> CreateAsync(TEntity entity);
+
+    Task<IEnumerable<TEntity>> CreateRangeAsync(IEnumerable<TEntity> entities);
+
+    Task<TEntity> UpdateAsync(TEntity entity);
+
+    Task UpdateRangeAsync(IEnumerable<TEntity> entities);
+
+    Task DeleteAsync(int id);
+
+    Task DeleteRangeAsync(IEnumerable<int> ids);
+
+    Task<int> SaveChangesAsync();
+
+    Task<bool> EntityExistsAsync(int id);
 }
