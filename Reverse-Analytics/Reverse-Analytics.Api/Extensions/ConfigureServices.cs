@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Reverse_Analytics.Api.Configurations;
 using ReverseAnalytics.Domain.Interfaces.Repositories;
 using ReverseAnalytics.Domain.Interfaces.Services;
 using ReverseAnalytics.Domain.Validators.Product;
@@ -99,6 +100,13 @@ public static class ConfigureServices
     public static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         services.AddSwaggerGen();
+
+        return services;
+    }
+
+    public static IServiceCollection AddConfigurations(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<DataSeedConfiguration>(configuration.GetSection(DataSeedConfiguration.SECTION));
 
         return services;
     }

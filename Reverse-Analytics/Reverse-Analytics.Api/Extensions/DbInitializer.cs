@@ -1,303 +1,192 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.Extensions.Options;
+using Reverse_Analytics.Api.Configurations;
+using ReverseAnalytics.Domain.Entities;
 using ReverseAnalytics.Infrastructure.Persistence;
-using System.Diagnostics;
+using ReverseAnalytics.TestDataCreator;
 
-namespace Reverse_Analytics.Api.Extensions
+namespace Reverse_Analytics.Api.Extensions;
+
+public class DatabaseSeeder(ApplicationDbContext context, IOptions<DataSeedConfiguration> options)
 {
-    internal static class DbInitializer
+    private readonly ApplicationDbContext _context = context;
+    private readonly DataSeedConfiguration _options = options.Value;
+    private readonly Fakers _faker = new();
+
+    public void Seed()
     {
-        public static IApplicationBuilder SeedDatabase(this IApplicationBuilder app)
-        {
-            ArgumentNullException.ThrowIfNull(app);
-
-            using var scope = app.ApplicationServices.CreateScope();
-            var services = scope.ServiceProvider;
-
-            try
-            {
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                // var identityContext = services.GetRequiredService<ApplicationIdentityDbContext>();
-                var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-
-                // DbSeeder.Initialize(context, identityContext, userManager);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-
-            return app;
-        }
+        GenerateProductCategories();
+        GenerateProducts();
+        GenerateCustomers();
+        GenerateSales();
+        GenerateSaleItems();
+        GenerateSuppliers();
+        GenerateSupplies();
+        GenerateSupplyItems();
+        GenerateTransactions();
     }
 
-    //internal static class DbSeeder
-    //{
-    //    private static readonly Faker _faker = new("ru");
-    //    private static readonly Random _random = new();
-    //    private static readonly DateTime minDate = DateTime.Now.AddYears(-2);
-    //    private static readonly DateTime maxDate = DateTime.Now;
+    private void GenerateProductCategories()
+    {
+        if (_context.ProductCategories.Any()) return;
 
-    //    public static void Initialize(ApplicationDbContext context,
-    //        UserManager<IdentityUser> userManager)
-    //    {
-    //        try
-    //        {
-    //            CreateProductCategories(context);
-    //            CreateProducts(context);
-    //            CreateCustomers(context);
-    //            CreateSales(context);
-    //            CreateSaleItems(context);
-    //            CreateRefunds(context);
-    //            CreateRefundItems(context);
-    //            CreateSuppliers(context);
-    //            CreateSupplies(context);
-    //            CreateSupplyItems(context);
-    //            //CreateInventories(context);
-    //            ////CreateInventoryItems(context);
-    //            //CreateRoles(identityContext);
-    //            //CreateUsers(identityContext, userManager);
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            Debug.WriteLine(ex.Message);
-    //        }
-    //    }
+        HashSet<string> categoryNames = [];
 
+        for (int i = 0; i < _options.CategoriesCount; i++)
+        {
+            int attempts = 0;
+            var category = _faker.ProductCategory().Generate();
 
-    //    private static void CreateProductCategories(ApplicationDbContext context)
-    //    {
-    //        if (context.ProductCategories.Any()) return;
+            // try to generate only unique values
+            while (categoryNames.Contains(category.Name) && attempts < 100)
+            {
+                category = _faker.ProductCategory().Generate();
+                attempts++;
+            }
 
-    //        List<ProductCategory> productCategories = new();
-    //        var fakeCategories = new Faker("ru").Commerce.Categories(20);
+            // if unable to generate unique value, don't add to context
+            if (categoryNames.Contains(category.Name))
+            {
+                continue;
+            }
 
-    //        for (int i = 0; i < fakeCategories.Length; i++)
-    //        {
-    //            productCategories.Add(
-    //                new ProductCategory()
-    //                {
-    //                    Name = fakeCategories[i]
-    //                });
-    //        }
+            _context.ProductCategories.Add(category);
+        }
 
-    //        context.ProductCategories.AddRange(productCategories);
-    //        context.SaveChanges();
-    //    }
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateProducts(ApplicationDbContext context)
-    //    {
-    //        if (context.Products.Any()) return;
+    private void GenerateProducts()
+    {
+        if (_context.Products.Any()) return;
 
-    //        var categories = context.ProductCategories.Select(x => x.Id).ToList();
-    //        var productFaker = new Faker<Product>("ru")
-    //            .RuleFor(x => x.ProductName, f => f.Commerce.ProductName())
-    //            .RuleFor(x => x.ProductCode, f => new Faker().Lorem.Letter(2))
-    //            .RuleFor(x => x.Description, f => f.Commerce.ProductDescription())
-    //            .RuleFor(x => x.SupplyPrice, f => f.Random.Decimal(10000, 50000))
-    //            .RuleFor(x => x.SalePrice, f => f.Random.Decimal(15000, 80000))
-    //            .RuleFor(x => x.Volume, f => f.Random.Double(10, 100))
-    //            .RuleFor(x => x.Weight, f => f.Random.Double(15, 150))
-    //            .RuleFor(x => x.UnitOfMeasurement, f => f.Random.Enum<UnitOfMeasurement>())
-    //            .RuleFor(x => x.QuantityInStock, f => f.Random.Int(0, 100))
-    //            .RuleFor(x => x.CategoryId, f => f.Random.ListItem(categories))
-    //            .Generate(100);
+        HashSet<string> productNames = [];
+        var categories = _context.ProductCategories.Select(x => x.Id).ToArray();
 
-    //        context.Products.AddRange(productFaker);
-    //        context.SaveChanges();
-    //    }
+        for (int i = 0; i < _options.ProductsCount; i++)
+        {
+            int attempts = 0;
+            var product = _faker.Product(categories).Generate();
 
-    //    private static void CreateCustomers(ApplicationDbContext context)
-    //    {
-    //        if (context.Customers.Any()) return;
+            // try to generate only unique values
+            while (productNames.Contains(product.Name) && attempts < 100)
+            {
+                product = _faker.Product(categories).Generate();
+                attempts++;
+            }
 
-    //        var customerFaker = new Faker<Customer>("ru")
-    //            .RuleFor(x => x.FullName, f => f.Person.FullName)
-    //            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber("+998-9#-###-##-##"))
-    //            .RuleFor(x => x.Company, f => f.Company.CompanyName())
-    //            .RuleFor(x => x.Address, f => f.Address.FullAddress())
-    //            .RuleFor(x => x.Balance, f => f.Random.Decimal(0, 500000))
-    //            .RuleFor(x => x.Discount, f => f.Random.Double(0, 50))
-    //            .Generate(30);
+            // if unable to generate unique value, don't add to context
+            if (productNames.Contains(product.Name))
+            {
+                continue;
+            }
 
-    //        context.Customers.AddRange(customerFaker);
-    //        context.SaveChanges();
-    //    }
+            _context.Products.Add(product);
+        }
 
-    //    private static void CreateSales(ApplicationDbContext context)
-    //    {
-    //        if (context.Sales.Any()) return;
+        _context.SaveChanges();
+    }
 
+    private void GenerateCustomers()
+    {
+        if (_context.Customers.Any()) return;
 
-    //        var customers = context.Customers.Select(x => x.Id).ToList();
-    //        var fakeSales = new Faker<Sale>("ru")
-    //            .RuleFor(x => x.Comments, f => f.Commerce.ProductAdjective())
-    //            .RuleFor(x => x.SoldBy, f => f.Person.FirstName)
-    //            .RuleFor(x => x.TotalDue, f => f.Random.Decimal(10000, 5000000))
-    //            .RuleFor(x => x.TotalPaid, f => f.Random.Decimal(5000, 5500000))
-    //            .RuleFor(x => x.TotalDiscount, f => f.Random.Decimal(1000, 500000))
-    //            .RuleFor(x => x.SaleType, f => f.Random.Enum<SaleType>())
-    //            .RuleFor(x => x.SaleDate, f => f.Date.Between(minDate, maxDate))
-    //            .RuleFor(x => x.CustomerId, f => f.Random.ListItem(customers))
-    //            .Generate(100);
+        var customers = _faker.Customer().Generate(_options.CustomersCount);
 
-    //        context.Sales.AddRange(fakeSales);
-    //        context.SaveChanges();
-    //    }
+        _context.Customers.AddRange(customers);
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateSaleItems(ApplicationDbContext context)
-    //    {
-    //        if (context.SaleItems.Any()) return;
+    private void GenerateSales()
+    {
+        if (_context.Sales.Any()) return;
 
-    //        var sales = context.Sales.Select(x => x.Id).ToList();
-    //        var products = context.Products.Select(x => x.Id).ToList();
-    //        var saleItemsFaker = new Faker<SaleItem>("ru")
-    //            .RuleFor(x => x.Quantity, f => f.Random.Int(1, 50))
-    //            .RuleFor(x => x.UnitPrice, f => f.Random.Decimal(5000, 50000))
-    //            .RuleFor(x => x.Discount, f => f.Random.Decimal(500, 20000))
-    //            .RuleFor(x => x.SaleId, f => f.Random.ListItem(sales))
-    //            .RuleFor(x => x.ProductId, f => f.Random.ListItem(products))
-    //            .Generate(500);
+        var customers = _context.Customers.Select(x => x.Id).ToArray();
+        var sales = _faker.Sale(customers).Generate(_options.SalesCount);
 
-    //        context.SaleItems.AddRange(saleItemsFaker);
-    //        context.SaveChanges();
-    //    }
+        _context.Sales.AddRange(sales);
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateRefunds(ApplicationDbContext context)
-    //    {
-    //        if (context.Refunds.Any()) return;
+    private void GenerateSaleItems()
+    {
+        if (_context.SaleItems.Any()) return;
 
-    //        var sales = context.Sales.Select(x => x.Id).ToList();
-    //        var refundFaker = new Faker<Refund>("ru")
-    //            .RuleFor(x => x.RefundDate, f => f.Date.Between(minDate, maxDate))
-    //            .RuleFor(x => x.Reason, f => f.Lorem.Text())
-    //            .RuleFor(x => x.ReceivedBy, f => f.Person.FirstName)
-    //            .RuleFor(x => x.SaleId, f => f.Random.ListItem(sales))
-    //            .Generate(25);
+        var sales = _context.Sales.Select(x => x.Id).ToArray();
+        var products = _context.Products.Select(x => x.Id).ToArray();
+        var saleItems = _faker.SaleItems(sales, products).Generate(_options.SaleItemsCount);
 
-    //        context.Refunds.AddRange(refundFaker);
-    //        context.SaveChanges();
-    //    }
+        _context.SaleItems.AddRange(saleItems);
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateRefundItems(ApplicationDbContext context)
-    //    {
-    //        if (context.RefundItems.Any()) return;
+    private void GenerateSuppliers()
+    {
+        if (_context.Suppliers.Any()) return;
 
-    //        var refunds = context.Refunds.Select(x => x.Id).ToList();
-    //        var products = context.Products.Select(x => x.Id).ToList();
-    //        var ItemsFaker = new Faker<RefundItem>("ru")
-    //            .RuleFor(x => x.Quantity, f => f.Random.Int(1, 10))
-    //            .RuleFor(x => x.RefundId, f => f.Random.ListItem(refunds))
-    //            .RuleFor(x => x.ProductId, f => f.Random.ListItem(products))
-    //            .Generate(150);
+        var suppliers = _faker.Supplier().Generate(_options.SuppliersCount);
 
-    //        context.RefundItems.AddRange(ItemsFaker);
-    //        context.SaveChanges();
-    //    }
+        _context.Suppliers.AddRange(suppliers);
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateSuppliers(ApplicationDbContext context)
-    //    {
-    //        if (context.Suppliers.Any()) return;
+    private void GenerateSupplies()
+    {
+        if (_context.Supplies.Any()) return;
 
-    //        var suppliersFaker = new Faker<Supplier>("ru")
-    //            .RuleFor(x => x.FullName, f => f.Person.FullName)
-    //            .RuleFor(x => x.PhoneNumber, f => f.Phone.PhoneNumber("+998-9#-###-##-##"))
-    //            .RuleFor(x => x.Company, f => f.Company.CompanyName())
-    //            .RuleFor(x => x.Balance, f => f.Random.Decimal(0, 500000))
-    //            .Generate(30);
+        var suppliers = _context.Suppliers.Select(x => x.Id).ToArray();
+        var suppplies = _faker.Supply(suppliers).Generate(_options.SuppliesCount);
 
-    //        context.Suppliers.AddRange(suppliersFaker);
-    //        context.SaveChanges();
-    //    }
+        _context.Supplies.AddRange(suppplies);
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateSupplies(ApplicationDbContext context)
-    //    {
-    //        if (context.Supplies.Any()) return;
+    private void GenerateSupplyItems()
+    {
+        if (_context.SupplyItems.Any()) return;
 
-    //        var suppliers = context.Suppliers.Select(x => x.Id).ToList();
-    //        var suppliesFaker = new Faker<Supply>("ru")
-    //            .RuleFor(x => x.ReceivedBy, f => f.Person.FirstName)
-    //            .RuleFor(x => x.Comments, f => f.Lorem.Sentence())
-    //            .RuleFor(x => x.TotalDue, f => f.Random.Decimal(100000, 5000000))
-    //            .RuleFor(x => x.TotalPaid, f => f.Random.Decimal(50000, 5500000))
-    //            .RuleFor(x => x.SupplyDate, f => f.Date.Between(minDate, maxDate))
-    //            .RuleFor(x => x.SupplierId, f => f.Random.ListItem(suppliers))
-    //            .Generate(100);
+        var supplies = _context.Supplies.Select(x => x.Id).ToArray();
+        var products = _context.Products.Select(x => x.Id).ToArray();
+        var supplyItems = _faker.SupplyItems(supplies, products).Generate(_options.SupplyItemsCount);
 
-    //        context.Supplies.AddRange(suppliesFaker);
-    //        context.SaveChanges();
-    //    }
+        _context.SupplyItems.AddRange(supplyItems);
+        _context.SaveChanges();
+    }
 
-    //    private static void CreateSupplyItems(ApplicationDbContext context)
-    //    {
-    //        if (context.SupplyItems.Any()) return;
+    private void GenerateTransactions()
+    {
+        if (_context.Transactions.Any()) return;
 
-    //        var supplies = context.Supplies.Select(x => x.Id).ToList();
-    //        var products = context.Products.Select(x => x.Id).ToList();
-    //        var ItemsFaker = new Faker<SupplyItem>("ru")
-    //            .RuleFor(x => x.Quantity, f => f.Random.Int(1, 50))
-    //            .RuleFor(x => x.UnitPrice, f => f.Random.Decimal(5000, 50000))
-    //            .RuleFor(x => x.SupplyId, f => f.Random.ListItem(supplies))
-    //            .RuleFor(x => x.ProductId, f => f.Random.ListItem(products))
-    //            .Generate(350);
+        var sales = _context.Sales.ToArray();
+        var supplies = _context.Supplies.ToArray();
 
-    //        context.SupplyItems.AddRange(ItemsFaker);
-    //        context.SaveChanges();
-    //    }
+        foreach (var sale in sales)
+        {
+            var transaction = new Transaction
+            {
+                Date = sale.Date,
+                Amount = sale.GetTransactionAmount(),
+                Source = sale.TransactionSource,
+                Type = sale.TransactionType,
+                SourceId = sale.GetTransactionSourceId()
+            };
 
-    //    private static void CreateRoles(ApplicationIdentityDbContext context)
-    //    {
-    //        if (context.Roles.Any()) return;
+            _context.Transactions.Add(transaction);
+        }
 
-    //        List<IdentityRole> roles = new();
+        foreach (var supply in supplies)
+        {
+            var transaction = new Transaction
+            {
+                Date = supply.Date,
+                Amount = supply.GetTransactionAmount(),
+                Source = supply.TransactionSource,
+                Type = supply.TransactionType,
+                SourceId = supply.GetTransactionSourceId()
+            };
 
-    //        roles.Add(new IdentityRole
-    //        {
-    //            Name = "Visitor",
-    //            NormalizedName = "VISITOR"
-    //        });
-    //        roles.Add(new IdentityRole
-    //        {
-    //            Name = "Regular",
-    //            NormalizedName = "REGULAR"
-    //        });
-    //        roles.Add(new IdentityRole
-    //        {
-    //            Name = "Accountant",
-    //            NormalizedName = "ACCOUNTANT"
-    //        });
-    //        roles.Add(new IdentityRole
-    //        {
-    //            Name = "Manager",
-    //            NormalizedName = "MANAGER"
-    //        });
-    //        roles.Add(new IdentityRole
-    //        {
-    //            Name = "Administrator",
-    //            NormalizedName = "ADMINISTRATOR"
-    //        });
+            _context.Transactions.Add(transaction);
+        }
 
-    //        context.Roles.AddRange(roles);
-    //        context.SaveChanges();
-    //    }
-
-    //    private static void CreateUsers(ApplicationIdentityDbContext context, UserManager<IdentityUser> userManager)
-    //    {
-    //        if (context.Users.Any()) return;
-
-    //        var roles = context.Roles.ToList();
-
-    //        for (int i = 0; i < 20; i++)
-    //        {
-    //            var role = roles.ElementAt(_random.Next(0, roles.Count));
-
-    //            var user = new IdentityUser
-    //            {
-    //                UserName = _faker.Internet.UserName(),
-    //            };
-
-    //            userManager.CreateAsync(user, $"qwerty{i}").Wait();
-    //            userManager.AddToRoleAsync(user, role.Name).Wait();
-    //        }
-    //    }
-    //}
+        _context.SaveChanges();
+    }
 }

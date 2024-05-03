@@ -25,7 +25,8 @@ builder.Services
     .AddValidators()
     .AddMappers()
     .AddServices()
-    .AddSwagger();
+    .AddSwagger()
+    .AddConfigurations(builder.Configuration);
 
 builder.Services.AddControllers(options =>
 {

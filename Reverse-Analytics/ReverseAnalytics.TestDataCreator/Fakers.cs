@@ -5,7 +5,7 @@ using ReverseAnalytics.Domain.Enums;
 
 namespace ReverseAnalytics.TestDataCreator;
 
-internal class Fakers
+public class Fakers
 {
     public Faker<Customer> Customer()
         => new Faker<Customer>()
