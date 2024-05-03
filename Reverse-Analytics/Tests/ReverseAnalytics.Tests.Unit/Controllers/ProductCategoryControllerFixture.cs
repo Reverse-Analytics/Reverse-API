@@ -42,7 +42,7 @@ public class ProductCategoryControllerTests : ControllerFixtureBase
 
         // Assert
         okResult.Should().NotBeNull();
-        okResult!.StatusCode.Should().Be(((int)HttpStatusCode.OK));
+        okResult!.StatusCode.Should().Be((int)HttpStatusCode.OK);
         okResult!.Value.Should().BeAssignableTo<IEnumerable<ProductCategoryDto>>();
         okResult!.Value.Should().BeEquivalentTo(paginatedCategories);
     }

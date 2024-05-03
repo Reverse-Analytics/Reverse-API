@@ -1,16 +1,17 @@
 ﻿namespace ReverseAnalytics.Tests.Unit.Architecture;
 
-public class ConstructorsFixture
+public class ConstructorsFixture : ArchitectureTestsBase
 {
     [Fact]
     public void ConstructorsOfAllControllers_ShouldThrowArgumentNullException_WhenAnyParameterIsNull()
     {
         // Arrange
-        var constructors = typeof(ProductCategoryController).Assembly
+        var constructors = Types.InAssembly(DomainAssembly)
             .GetTypes()
             .Where(t => t.Namespace is not null && t.Namespace.Contains("Controllers"))
+            .Where(t => t.IsAssignableTo(typeof(ControllerBase)))
             .SelectMany(t => t.GetConstructors())
-            .Where(t => t.GetParameters().Length > 0)
+            .Where(c => c.GetParameters().Length > 0)
             .ToList();
 
         // Act & Assert
